@@ -1,0 +1,130 @@
+
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Video Studio</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0b1020;color:#f4f5fa;font-family:Arial,sans-serif}
+header{padding:24px 18px;background:#151d32;border-bottom:1px solid #34405c}
+h1{margin:0;color:#8ea9ff;font-size:26px}
+header p{color:#b8c1d6;margin-bottom:0}
+main{max-width:850px;margin:auto;padding:18px}
+.tabs{display:flex;gap:10px;margin:15px 0}
+button,.tab{border:0;border-radius:10px;padding:13px;background:#283653;color:white;font-size:15px;cursor:pointer}
+.tab.active{background:#536fe0}
+.panel{background:#151d32;border:1px solid #34405c;padding:18px;border-radius:15px;margin:15px 0}
+h2{font-size:20px}
+label{display:block;margin:14px 0 7px;color:#cbd5ed}
+input,textarea,select{width:100%;padding:13px;border-radius:9px;border:1px solid #465473;background:#0d1425;color:white;font-size:15px}
+textarea{min-height:115px;resize:vertical}
+.primary{background:#536fe0;width:100%;margin-top:15px;font-weight:bold}
+.secondary{background:#263754;width:100%;margin-top:10px}
+.note{color:#aab6d0;font-size:13px;line-height:1.6}
+#preview{width:100%;max-height:300px;margin-top:12px;border-radius:10px;display:none;background:#000}
+#result{white-space:pre-wrap;line-height:1.7;color:#dce4ff}
+.hidden{display:none}
+footer{text-align:center;color:#8794af;padding:25px;font-size:13px}
+</style>
+</head>
+<body>
+<header>
+<h1>🎬 AI Video Studio</h1>
+<p>आपका अपना Personal Video Creation Studio</p>
+</header>
+<main>
+<div class="tabs">
+<button class="tab active" onclick="showTab('edit',this)">✂️ Video Editing</button>
+<button class="tab" onclick="showTab('script',this)">✨ Script to Video</button>
+</div>
+
+<section id="edit" class="panel">
+<h2>🎥 Automatic Video Editing</h2>
+<p class="note">अपना Raw Video चुनें और बताएं कि आपको कैसा वीडियो चाहिए।</p>
+<label>अपना वीडियो अपलोड करें</label>
+<input type="file" id="videoFile" accept="video/*">
+<video id="preview" controls></video>
+<label>वीडियो का प्रकार</label>
+<select id="videoType">
+<option>Birthday Video</option>
+<option>Wedding Video</option>
+<option>YouTube Video</option>
+<option>Instagram Reel / Short</option>
+<option>Podcast</option>
+<option>Cinematic Video</option>
+<option>Other</option>
+</select>
+<label>आप क्या एडिट करवाना चाहते हैं?</label>
+<textarea id="editPrompt" placeholder="उदाहरण: खाली हिस्से काट दो, अच्छे पल रखो, सुंदर म्यूजिक और हिंदी कैप्शन लगाओ..."></textarea>
+<button class="primary" onclick="editRequest()">🚀 Start Automatic Editing</button>
+<p class="note">अभी यह शुरुआती इंटरफेस है। वास्तविक AI एडिटिंग सुविधा अगले चरणों में जोड़ी जाएगी।</p>
+</section>
+
+<section id="script" class="panel hidden">
+<h2>✨ Script to Video Generator</h2>
+<p class="note">अपनी कहानी या स्क्रिप्ट यहाँ लिखें।</p>
+<label>अपनी Script लिखें</label>
+<textarea id="story" placeholder="यहाँ अपनी कहानी लिखें..."></textarea>
+<label>Animation Style</label>
+<select id="style">
+<option>3D Cartoon</option>
+<option>Realistic 3D</option>
+<option>Stylized 3D Animation</option>
+<option>2D Cartoon</option>
+</select>
+<label>वीडियो की भाषा</label>
+<select id="language">
+<option>Hindi</option>
+<option>English</option>
+<option>Both Hindi and English</option>
+</select>
+<label>वीडियो की लंबाई</label>
+<select id="duration">
+<option>1 Minute</option>
+<option>30 Seconds</option>
+<option>2 Minutes</option>
+<option>5 Minutes</option>
+</select>
+<button class="primary" onclick="makeScenes()">🎬 Create Scene Plan</button>
+<div id="result"></div>
+<p class="note">यह अभी स्क्रिप्ट को सीन में बाँटने का शुरुआती फीचर है। AI इमेज, वॉइसओवर और MP4 बनाने की सुविधाएँ आगे जोड़ी जाएँगी।</p>
+</section>
+</main>
+<footer>AI Video Studio · Personal Project · Free Starter Version</footer>
+
+<script>
+function showTab(id,btn){
+document.getElementById('edit').classList.toggle('hidden',id!=='edit');
+document.getElementById('script').classList.toggle('hidden',id!=='script');
+document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+btn.classList.add('active');
+}
+document.getElementById('videoFile').addEventListener('change',function(){
+const file=this.files[0];
+if(!file)return;
+const video=document.getElementById('preview');
+video.src=URL.createObjectURL(file);
+video.style.display='block';
+});
+function editRequest(){
+const file=document.getElementById('videoFile').files[0];
+if(!file){alert('पहले अपना वीडियो चुनिए।');return;}
+alert('आपका वीडियो चुना गया है। वास्तविक AI एडिटिंग इंजन अगले चरण में जोड़ा जाएगा।');
+}
+function makeScenes(){
+const story=document.getElementById('story').value.trim();
+if(!story){alert('पहले अपनी कहानी लिखिए।');return;}
+const scenes=story.split(/[.!?।\n]+/).filter(s=>s.trim());
+let output='आपकी कहानी का Scene Plan\\n\\n';
+scenes.forEach((scene,i)=>{
+output+='Scene '+(i+1)+': '+scene.trim()+'\\n';
+output+='Visual: '+document.getElementById('style').value+' शैली में इस सीन का दृश्य\\n\\n';
+});
+document.getElementById('result').textContent=output;
+}
+</script>
+</body>
+  </html>
+  
