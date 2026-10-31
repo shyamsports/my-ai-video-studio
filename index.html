@@ -125,6 +125,121 @@ output+='Visual: '+document.getElementById('style').value+' शैली मे�
 document.getElementById('result').textContent=output;
 }
 </script>
+
+<script>
+(function () {
+  const studio = document.createElement("section");
+  studio.id = "free-script-studio";
+  studio.style.cssText = `
+    margin:24px auto;padding:20px;max-width:850px;
+    background:#182235;color:white;border-radius:16px;
+    font-family:Arial,sans-serif;
+  `;
+
+  studio.innerHTML = `
+    <h2>🎬 Free Script to Video Studio</h2>
+    <p>अपनी कहानी या स्क्रिप्ट यहाँ लिखें:</p>
+    <textarea id="freeStory" rows="7"
+      placeholder="यहाँ अपनी कहानी लिखें..."
+      style="width:100%;box-sizing:border-box;padding:12px;
+      border-radius:8px;font-size:16px;"></textarea>
+
+    <p>वीडियो की भाषा:</p>
+    <select id="freeLang" style="padding:10px;width:100%;">
+      <option value="hi-IN">हिंदी</option>
+      <option value="en-US">English</option>
+    </select>
+
+    <button id="freeMake" style="margin-top:14px;padding:13px;
+      background:#16a36a;color:white;border:0;border-radius:8px;
+      font-size:16px;">Create Scene Plan</button>
+
+    <button id="freeSpeak" style="margin:10px 0 0;padding:13px;
+      background:#2867d7;color:white;border:0;border-radius:8px;
+      font-size:16px;">🔊 सुनें (Voiceover)</button>
+
+    <button id="freeDownload" style="margin:10px 0 0;padding:13px;
+      background:#555;color:white;border:0;border-radius:8px;
+      font-size:16px;">Download Scene Plan</button>
+
+    <div id="freeScenes" style="margin-top:18px;"></div>
+    <p id="freeStatus"></p>
+  `;
+
+  document.body.appendChild(studio);
+
+  let scenes = [];
+
+  document.getElementById("freeMake").onclick = function () {
+    const story = document.getElementById("freeStory").value.trim();
+    const output = document.getElementById("freeScenes");
+    output.innerHTML = "";
+    scenes = [];
+
+    if (!story) {
+      output.textContent = "पहले अपनी कहानी लिखिए।";
+      return;
+    }
+
+    scenes = story.split(/(?<=[.!?।])\s+/).filter(Boolean);
+
+    scenes.forEach((scene, index) => {
+      const card = document.createElement("div");
+      card.style.cssText =
+        "padding:12px;margin:10px 0;background:#26364e;border-radius:10px;";
+      const heading = document.createElement("h3");
+      heading.textContent = "Scene " + (index + 1);
+      const paragraph = document.createElement("p");
+      paragraph.textContent = scene;
+      card.append(heading, paragraph);
+      output.appendChild(card);
+    });
+
+    document.getElementById("freeStatus").textContent =
+      scenes.length + " scenes तैयार हैं।";
+  };
+
+  document.getElementById("freeSpeak").onclick = function () {
+    if (!scenes.length) {
+      document.getElementById("freeStatus").textContent =
+        "पहले Create Scene Plan दबाइए।";
+      return;
+    }
+
+    if (!("speechSynthesis" in window)) {
+      document.getElementById("freeStatus").textContent =
+        "इस ब्राउज़र में Voiceover उपलब्ध नहीं है।";
+      return;
+    }
+
+    speechSynthesis.cancel();
+    const text = scenes.join(" ");
+    const voice = new SpeechSynthesisUtterance(text);
+    voice.lang = document.getElementById("freeLang").value;
+    speechSynthesis.speak(voice);
+  };
+
+  document.getElementById("freeDownload").onclick = function () {
+    if (!scenes.length) {
+      document.getElementById("freeStatus").textContent =
+        "पहले Scene Plan बनाइए।";
+      return;
+    }
+
+    const content = scenes.map((s, i) =>
+      "Scene " + (i + 1) + "\n" + s
+    ).join("\n\n");
+
+    const file = new Blob([content], {type:"text/plain;charset=utf-8"});
+    const url = URL.createObjectURL(file);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "my-scene-plan.txt";
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+})();
+</script>
 </body>
   </html>
   
