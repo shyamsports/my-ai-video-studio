@@ -1,1 +1,106 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My AI Voiceover Studio</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:20px;background:#101827;color:white;font-family:Arial,sans-serif}
+.container{max-width:750px;margin:20px auto;padding:24px;background:#1d293b;border-radius:16px}
+h1{text-align:center;color:#62d6ff}
+label{display:block;margin-top:18px;margin-bottom:8px;font-weight:bold}
+select,textarea,button{width:100%;padding:13px;border-radius:9px;border:none;font-size:16px}
+select,textarea{background:#f3f5f8;color:#111}
+textarea{min-height:260px;resize:vertical;line-height:1.6}
+button{margin-top:20px;background:#08a6dc;color:white;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.6}
+#status{margin-top:16px;text-align:center;line-height:1.5}
+audio{width:100%;margin-top:20px}
+.download{display:block;text-align:center;margin-top:15px;padding:13px;background:#16834a;color:white;text-decoration:none;border-radius:9px;font-weight:bold}
+.small{color:#c5d0df;font-size:13px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>🎙️ My AI Voiceover Studio</h1>
+<p style="text-align:center">अपनी स्क्रिप्ट को MP3 आवाज़ में बदलें</p>
 
+<label>भाषा चुनें</label>
+<select id="language">
+<option value="hi">हिंदी</option>
+<option value="en">English</option>
+</select>
+
+<label>Voice Style चुनें</label>
+<select id="style">
+<option value="story">Storytelling – कहानी सुनाने का अंदाज़</option>
+<option value="documentary">Documentary – गंभीर और जानकारीपूर्ण</option>
+<option value="explainer">Explainer – सरल और दोस्ताना</option>
+</select>
+
+<label>अपनी स्क्रिप्ट यहाँ पेस्ट करें</label>
+<textarea id="script" placeholder="अपनी स्क्रिप्ट यहाँ लिखें या पेस्ट करें..."></textarea>
+
+<p class="small">लंबी स्क्रिप्ट बनाने में अधिक समय लग सकता है। इंटरनेट चालू रखें।</p>
+
+<button id="generateBtn" onclick="generateVoice()">Generate Voiceover</button>
+<div id="status"></div>
+
+<audio id="audioPlayer" controls style="display:none"></audio>
+<a id="downloadLink" class="download" style="display:none" download="voiceover.mp3">⬇️ Download MP3</a>
+</div>
+
+<script>
+let currentAudioUrl=null;
+
+async function generateVoice(){
+const script=document.getElementById("script").value.trim();
+const language=document.getElementById("language").value;
+const style=document.getElementById("style").value;
+const button=document.getElementById("generateBtn");
+const status=document.getElementById("status");
+const player=document.getElementById("audioPlayer");
+const download=document.getElementById("downloadLink");
+
+if(!script){status.textContent="पहले अपनी स्क्रिप्ट पेस्ट करें।";return;}
+
+button.disabled=true;
+button.textContent="आवाज़ तैयार हो रही है...";
+status.textContent="कृपया प्रतीक्षा करें...";
+player.style.display="none";
+download.style.display="none";
+
+try{
+const response=await fetch("/api/voiceover",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({script:script,language:language,style:style})
+});
+
+if(!response.ok){
+let message="ऑडियो नहीं बन पाया।";
+try{const errorData=await response.json();message=errorData.detail||message;}catch(e){}
+throw new Error(message);
+}
+
+const audioBlob=await response.blob();
+if(currentAudioUrl){URL.revokeObjectURL(currentAudioUrl);}
+currentAudioUrl=URL.createObjectURL(audioBlob);
+
+player.src=currentAudioUrl;
+player.style.display="block";
+download.href=currentAudioUrl;
+download.style.display="block";
+status.textContent="✅ आपका Voiceover तैयार है!";
+
+}catch(error){
+status.textContent="❌ "+error.message;
+}finally{
+button.disabled=false;
+button.textContent="Generate Voiceover";
+}
+}
+</script>
+</body>
+</html>
