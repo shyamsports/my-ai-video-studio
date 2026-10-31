@@ -240,6 +240,78 @@ document.getElementById('result').textContent=output;
   };
 })();
 </script>
+
+<section id="scene-image-studio" style="margin:24px auto;padding:20px;max-width:850px;background:#182235;color:white;border-radius:16px;font-family:Arial">
+  <h2>🖼️ Scene Image Studio</h2>
+  <p>हर Scene के लिए अपनी तस्वीर जोड़ें और उसका प्रॉम्प्ट तैयार करें।</p>
+  <div id="imageSceneList"></div>
+  <p id="imageStudioStatus"></p>
+</section>
+
+<script>
+(function(){
+  const root=document.getElementById("imageSceneList");
+  const status=document.getElementById("imageStudioStatus");
+
+  function makeScenes(){
+    const story=document.getElementById("freeStory");
+    if(!story || !story.value.trim()){
+      status.textContent="पहले अपनी कहानी लिखें और Scene Plan बनाएँ।";
+      return;
+    }
+
+    root.innerHTML="";
+    const scenes=story.value.trim().split(/(?<=[.!?।])\s+/).filter(Boolean);
+
+    scenes.forEach((scene,i)=>{
+      const card=document.createElement("div");
+      card.style.cssText="background:#26364e;padding:14px;margin:12px 0;border-radius:12px";
+
+      const heading=document.createElement("h3");
+      heading.textContent="Scene "+(i+1);
+
+      const description=document.createElement("p");
+      description.textContent=scene;
+
+      const prompt=document.createElement("textarea");
+      prompt.rows=3;
+      prompt.style.cssText="width:100%;box-sizing:border-box;padding:10px";
+      prompt.value="Create a beautiful cinematic illustration showing: "+scene+
+        ". Detailed composition, expressive characters, high quality.";
+
+      const upload=document.createElement("input");
+      upload.type="file";
+      upload.accept="image/*";
+      upload.style.cssText="display:block;margin:12px 0";
+
+      const preview=document.createElement("img");
+      preview.style.cssText="display:none;width:100%;max-height:350px;object-fit:contain;border-radius:10px";
+
+      upload.onchange=function(){
+        const file=upload.files[0];
+        if(!file)return;
+        if(preview.dataset.url)URL.revokeObjectURL(preview.dataset.url);
+        const url=URL.createObjectURL(file);
+        preview.dataset.url=url;
+        preview.src=url;
+        preview.style.display="block";
+        status.textContent="Scene "+(i+1)+" की तस्वीर जोड़ी गई।";
+      };
+
+      card.append(heading,description,prompt,upload,preview);
+      root.appendChild(card);
+    });
+
+    status.textContent=scenes.length+" Scene तैयार। अब हर Scene में तस्वीर जोड़ सकते हैं।";
+  }
+
+  const button=document.createElement("button");
+  button.textContent="🖼️ Generate Scene Image Prompts";
+  button.style.cssText="padding:13px;background:#16a36a;color:white;border:0;border-radius:8px;font-size:16px;margin:12px 0";
+  button.onclick=makeScenes;
+  root.before(button);
+})();
+</script>
 </body>
   </html>
   
