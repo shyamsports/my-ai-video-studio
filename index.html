@@ -312,6 +312,115 @@ document.getElementById('result').textContent=output;
   root.before(button);
 })();
 </script>
+
+<script>
+(function () {
+  const root = document.getElementById("imageSceneList");
+  if (!root) return;
+
+  const button = document.createElement("button");
+  button.textContent = "✨ Generate AI Images for All Scenes";
+  button.style.cssText =
+    "padding:14px;background:#16a36a;color:white;border:0;border-radius:9px;font-size:16px;width:100%;margin:15px 0;";
+  root.parentNode.insertBefore(button, root);
+
+  button.onclick = async function () {
+    const cards = Array.from(root.children).filter(
+      el => el.querySelector("textarea")
+    );
+
+    if (!cards.length) {
+      alert("पहले Script to Video में Scene Plan बनाइए।");
+      return;
+    }
+
+    button.disabled = true;
+
+    try {
+      for (let i = 0; i < cards.length; i++) {
+        const card = cards[i];
+        const prompt = card.querySelector("textarea").value.trim();
+        const preview = card.querySelector("img");
+        const status = document.createElement("p");
+
+        card.appendChild(status);
+        status.textContent = "⏳ Scene " + (i + 1) + " की तस्वीर बन रही है...";
+
+        try {
+          const response = await fetch(
+            "https://aihorde.net/api/v2/generate/async",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "apikey": "0000000000",
+                "Client-Agent": "AI-Video-Studio:1.0"
+              },
+              body: JSON.stringify({
+                prompt: prompt,
+                params: {
+                  width: 512,
+                  height: 512,
+                  steps: 20,
+                  n: 1
+                },
+                nsfw: false,
+                censor_nsfw: true
+              })
+            }
+          );
+
+          if (!response.ok) throw new Error("Request failed: " + response.status);
+
+          const job = await response.json();
+          if (!job.id) throw new Error("Job ID नहीं मिला");
+
+          let imageUrl = null;
+
+          for (let attempt = 0; attempt < 60; attempt++) {
+            await new Promise(resolve => setTimeout(resolve, 10000));
+
+            const check = await fetch(
+              "https://aihorde.net/api/v2/generate/check/" + job.id
+            );
+
+            if (!check.ok) throw new Error("Status check failed");
+
+            const data = await check.json();
+
+            if (data.faulted) throw new Error("Generation असफल हुई");
+
+            if (data.done) {
+              const result = await fetch(
+                "https://aihorde.net/api/v2/generate/status/" + job.id
+              );
+              const output = await result.json();
+
+              if (output.generations && output.generations.length) {
+                imageUrl = output.generations[0].img;
+              }
+              break;
+            }
+
+            status.textContent =
+              "⏳ Scene " + (i + 1) + " कतार में है... कृपया प्रतीक्षा करें।";
+          }
+
+          if (!imageUrl) throw new Error("समय पूरा हुआ या तस्वीर नहीं मिली");
+
+          preview.src = imageUrl;
+          preview.style.display = "block";
+          status.textContent = "✅ Scene " + (i + 1) + " की तस्वीर तैयार!";
+        } catch (error) {
+          status.textContent = "⚠️ Scene " + (i + 1) + ": " + error.message;
+        }
+      }
+    } finally {
+      button.disabled = false;
+    }
+  };
+})();
+</script>
 </body>
   </html>
   
