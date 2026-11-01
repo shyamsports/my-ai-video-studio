@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="hi">
 <head>
@@ -25,15 +24,8 @@ background:#1d293b;
 border-radius:16px
 }
 
-h1{
-text-align:center;
-color:#62d6ff
-}
-
-h2{
-color:#62d6ff;
-margin-top:10px
-}
+h1{text-align:center;color:#62d6ff}
+h2{color:#62d6ff;margin-top:10px}
 
 label{
 display:block;
@@ -50,10 +42,7 @@ border:none;
 font-size:16px
 }
 
-select,textarea{
-background:#f3f5f8;
-color:#111
-}
+select,textarea{background:#f3f5f8;color:#111}
 
 textarea{
 min-height:260px;
@@ -69,9 +58,7 @@ font-weight:bold;
 cursor:pointer
 }
 
-button:disabled{
-opacity:.6
-}
+button:disabled{opacity:.6}
 
 #status,#plannerStatus{
 margin-top:16px;
@@ -79,10 +66,7 @@ text-align:center;
 line-height:1.5
 }
 
-audio{
-width:100%;
-margin-top:20px
-}
+audio{width:100%;margin-top:20px}
 
 .download{
 display:block;
@@ -117,18 +101,9 @@ border:1px solid #42516a;
 overflow-wrap:anywhere
 }
 
-.scene-card h3{
-color:#62d6ff;
-margin-top:0
-}
-
-.scene-card p{
-line-height:1.6
-}
-
-.scene-card strong{
-color:#b9eaff
-}
+.scene-card h3{color:#62d6ff;margin-top:0}
+.scene-card p{line-height:1.6}
+.scene-card strong{color:#b9eaff}
 
 .character-card{
 background:#202f43;
@@ -144,6 +119,31 @@ margin-top:10px;
 padding:10px
 }
 
+.format-option{
+display:flex;
+align-items:center;
+gap:12px;
+padding:16px;
+margin-top:12px;
+background:#26364c;
+border:2px solid #42516a;
+border-radius:12px;
+cursor:pointer
+}
+
+.format-option:has(input:checked){
+border-color:#08a6dc;
+background:#183d54
+}
+
+.format-option input{
+width:20px;
+height:20px;
+accent-color:#08a6dc
+}
+
+.format-option span{line-height:1.5}
+
 @media(max-width:500px){
 body{padding:10px}
 .container{padding:17px}
@@ -152,8 +152,38 @@ body{padding:10px}
 </head>
 
 <body>
-
 <div class="container">
+
+<!-- VIDEO FORMAT SELECTION -->
+
+<h1>🎬 My AI Video Studio</h1>
+<p style="text-align:center">
+सबसे पहले अपना Video Format चुनें
+</p>
+
+<label>आप किस तरह का वीडियो बनाना चाहते हैं?</label>
+
+<label class="format-option">
+<input type="radio" name="videoFormat" value="landscape">
+<span>
+<strong>📺 Full YouTube Video</strong><br>
+16:9 — Landscape Format
+</span>
+</label>
+
+<label class="format-option">
+<input type="radio" name="videoFormat" value="portrait">
+<span>
+<strong>📱 YouTube Shorts / Reels</strong><br>
+9:16 — Vertical Format
+</span>
+</label>
+
+<p class="small">
+Format चुनने के बाद नीचे अपनी स्क्रिप्ट और कहानी इस्तेमाल करें।
+</p>
+
+<hr class="section-divider">
 
 <!-- EXISTING VOICEOVER STUDIO -->
 
@@ -184,11 +214,9 @@ body{padding:10px}
 <audio id="audioPlayer" controls style="display:none"></audio>
 <a id="downloadLink" class="download" style="display:none" download="voiceover.mp3">⬇️ Download MP3</a>
 
-<!-- VOICEOVER SECTION ENDS -->
-
 <hr class="section-divider">
 
-<!-- NEW AI SCENE PLANNER -->
+<!-- AI SCENE PLANNER -->
 
 <h1>🎬 AI Scene Planner</h1>
 
@@ -198,10 +226,7 @@ body{padding:10px}
 
 <label>अपनी कहानी या स्क्रिप्ट यहाँ पेस्ट करें</label>
 
-<textarea
-id="plannerScript"
-placeholder="यहाँ अपनी पूरी कहानी या स्क्रिप्ट पेस्ट करें..."
-></textarea>
+<textarea id="plannerScript" placeholder="यहाँ अपनी पूरी कहानी या स्क्रिप्ट पेस्ट करें..."></textarea>
 
 <p class="small">
 AI आपकी कहानी के Scenes, Characters, Image Prompts,
@@ -213,16 +238,13 @@ Camera Details और Sound Effects तैयार करेगा।
 </button>
 
 <div id="plannerStatus"></div>
-
 <div id="plannerResults"></div>
 
 </div>
 
 <script>
 
-// ---------------------------------
 // EXISTING VOICEOVER JAVASCRIPT
-// ---------------------------------
 
 let currentAudioUrl=null;
 
@@ -275,9 +297,7 @@ button.textContent="Generate Voiceover";
 }
 
 
-// ---------------------------------
-// NEW AI SCENE PLANNER JAVASCRIPT
-// ---------------------------------
+// AI SCENE PLANNER JAVASCRIPT
 
 async function generateScenes(){
 
@@ -285,6 +305,13 @@ const script=document.getElementById("plannerScript").value.trim();
 const button=document.getElementById("plannerBtn");
 const status=document.getElementById("plannerStatus");
 const results=document.getElementById("plannerResults");
+
+const selectedFormat=document.querySelector('input[name="videoFormat"]:checked');
+
+if(!selectedFormat){
+status.textContent="पहले Full Video या Shorts Format चुनें।";
+return;
+}
 
 if(!script){
 status.textContent="पहले अपनी कहानी या स्क्रिप्ट पेस्ट करें।";
@@ -301,18 +328,18 @@ try{
 const response=await fetch("/api/plan-scenes",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
-body:JSON.stringify({script:script})
+body:JSON.stringify({
+script:script,
+video_format:selectedFormat.value
+})
 });
 
 if(!response.ok){
-
 let message="Scenes तैयार नहीं हो पाए।";
-
 try{
 const errorData=await response.json();
 message=errorData.detail||message;
 }catch(e){}
-
 throw new Error(message);
 }
 
@@ -323,27 +350,19 @@ displaySceneResults(data);
 status.textContent="✅ आपके AI Scenes सफलतापूर्वक तैयार हो गए!";
 
 }catch(error){
-
 status.textContent="❌ "+error.message;
-
 }finally{
-
 button.disabled=false;
 button.textContent="✨ Generate AI Scenes";
-
+}
 }
 
-}
 
-
-// ---------------------------------
 // DISPLAY SCENE RESULTS
-// ---------------------------------
 
 function displaySceneResults(data){
 
 const results=document.getElementById("plannerResults");
-
 results.innerHTML="";
 
 const summary=document.createElement("div");
@@ -352,13 +371,19 @@ summary.className="scene-card";
 const summaryTitle=document.createElement("h3");
 summaryTitle.textContent="📖 Story Summary";
 
+const formatText=document.createElement("p");
+formatText.textContent="🎞️ Video Format: "+(data.video_format||"");
+
+const ratioText=document.createElement("p");
+ratioText.textContent="📐 Aspect Ratio: "+(data.aspect_ratio||"");
+
 const summaryText=document.createElement("p");
 summaryText.textContent=data.story_summary||"";
 
 const styleText=document.createElement("p");
 styleText.textContent="🎨 Visual Style: "+(data.visual_style||"");
 
-summary.append(summaryTitle,summaryText,styleText);
+summary.append(summaryTitle,formatText,ratioText,summaryText,styleText);
 results.appendChild(summary);
 
 
@@ -428,27 +453,17 @@ copyButton.className="copy-button";
 copyButton.textContent="📋 Copy Image Prompt";
 
 copyButton.onclick=async function(){
-
 try{
 await navigator.clipboard.writeText(scene.image_prompt||"");
 copyButton.textContent="✅ Copied!";
 }catch(error){
 copyButton.textContent="Copy नहीं हुआ";
 }
-
 };
 
 card.append(
-heading,
-narration,
-prompt,
-characters,
-setting,
-camera,
-mood,
-sounds,
-music,
-copyButton
+heading,narration,prompt,characters,setting,
+camera,mood,sounds,music,copyButton
 );
 
 results.appendChild(card);
@@ -456,16 +471,13 @@ results.appendChild(card);
 });
 
 if(!data.scenes||data.scenes.length===0){
-
 const empty=document.createElement("p");
 empty.textContent="AI ने कोई Scene नहीं लौटाया। दोबारा कोशिश करें।";
 results.appendChild(empty);
-
 }
 
 }
 
 </script>
-
 </body>
 </html>
