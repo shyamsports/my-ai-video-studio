@@ -1,28 +1,162 @@
+
 <!DOCTYPE html>
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My AI Voiceover Studio</title>
+<title>My AI Video Studio</title>
+
 <style>
 *{box-sizing:border-box}
-body{margin:0;padding:20px;background:#101827;color:white;font-family:Arial,sans-serif}
-.container{max-width:750px;margin:20px auto;padding:24px;background:#1d293b;border-radius:16px}
-h1{text-align:center;color:#62d6ff}
-label{display:block;margin-top:18px;margin-bottom:8px;font-weight:bold}
-select,textarea,button{width:100%;padding:13px;border-radius:9px;border:none;font-size:16px}
-select,textarea{background:#f3f5f8;color:#111}
-textarea{min-height:260px;resize:vertical;line-height:1.6}
-button{margin-top:20px;background:#08a6dc;color:white;font-weight:bold;cursor:pointer}
-button:disabled{opacity:.6}
-#status{margin-top:16px;text-align:center;line-height:1.5}
-audio{width:100%;margin-top:20px}
-.download{display:block;text-align:center;margin-top:15px;padding:13px;background:#16834a;color:white;text-decoration:none;border-radius:9px;font-weight:bold}
-.small{color:#c5d0df;font-size:13px;line-height:1.5}
+
+body{
+margin:0;
+padding:20px;
+background:#101827;
+color:white;
+font-family:Arial,sans-serif
+}
+
+.container{
+max-width:750px;
+margin:20px auto;
+padding:24px;
+background:#1d293b;
+border-radius:16px
+}
+
+h1{
+text-align:center;
+color:#62d6ff
+}
+
+h2{
+color:#62d6ff;
+margin-top:10px
+}
+
+label{
+display:block;
+margin-top:18px;
+margin-bottom:8px;
+font-weight:bold
+}
+
+select,textarea,button{
+width:100%;
+padding:13px;
+border-radius:9px;
+border:none;
+font-size:16px
+}
+
+select,textarea{
+background:#f3f5f8;
+color:#111
+}
+
+textarea{
+min-height:260px;
+resize:vertical;
+line-height:1.6
+}
+
+button{
+margin-top:20px;
+background:#08a6dc;
+color:white;
+font-weight:bold;
+cursor:pointer
+}
+
+button:disabled{
+opacity:.6
+}
+
+#status,#plannerStatus{
+margin-top:16px;
+text-align:center;
+line-height:1.5
+}
+
+audio{
+width:100%;
+margin-top:20px
+}
+
+.download{
+display:block;
+text-align:center;
+margin-top:15px;
+padding:13px;
+background:#16834a;
+color:white;
+text-decoration:none;
+border-radius:9px;
+font-weight:bold
+}
+
+.small{
+color:#c5d0df;
+font-size:13px;
+line-height:1.5
+}
+
+.section-divider{
+border:0;
+border-top:1px solid #42516a;
+margin:35px 0
+}
+
+.scene-card{
+background:#26364c;
+padding:16px;
+margin-top:16px;
+border-radius:12px;
+border:1px solid #42516a;
+overflow-wrap:anywhere
+}
+
+.scene-card h3{
+color:#62d6ff;
+margin-top:0
+}
+
+.scene-card p{
+line-height:1.6
+}
+
+.scene-card strong{
+color:#b9eaff
+}
+
+.character-card{
+background:#202f43;
+padding:14px;
+margin-top:12px;
+border-radius:10px;
+overflow-wrap:anywhere
+}
+
+.copy-button{
+background:#16834a;
+margin-top:10px;
+padding:10px
+}
+
+@media(max-width:500px){
+body{padding:10px}
+.container{padding:17px}
+}
 </style>
 </head>
+
 <body>
+
 <div class="container">
+
+<!-- EXISTING VOICEOVER STUDIO -->
+
 <h1>🎙️ My AI Voiceover Studio</h1>
 <p style="text-align:center">अपनी स्क्रिप्ट को MP3 आवाज़ में बदलें</p>
 
@@ -49,9 +183,47 @@ audio{width:100%;margin-top:20px}
 
 <audio id="audioPlayer" controls style="display:none"></audio>
 <a id="downloadLink" class="download" style="display:none" download="voiceover.mp3">⬇️ Download MP3</a>
+
+<!-- VOICEOVER SECTION ENDS -->
+
+<hr class="section-divider">
+
+<!-- NEW AI SCENE PLANNER -->
+
+<h1>🎬 AI Scene Planner</h1>
+
+<p style="text-align:center">
+अपनी कहानी को AI की मदद से अलग-अलग Video Scenes में बदलें
+</p>
+
+<label>अपनी कहानी या स्क्रिप्ट यहाँ पेस्ट करें</label>
+
+<textarea
+id="plannerScript"
+placeholder="यहाँ अपनी पूरी कहानी या स्क्रिप्ट पेस्ट करें..."
+></textarea>
+
+<p class="small">
+AI आपकी कहानी के Scenes, Characters, Image Prompts,
+Camera Details और Sound Effects तैयार करेगा।
+</p>
+
+<button id="plannerBtn" onclick="generateScenes()">
+✨ Generate AI Scenes
+</button>
+
+<div id="plannerStatus"></div>
+
+<div id="plannerResults"></div>
+
 </div>
 
 <script>
+
+// ---------------------------------
+// EXISTING VOICEOVER JAVASCRIPT
+// ---------------------------------
+
 let currentAudioUrl=null;
 
 async function generateVoice(){
@@ -101,6 +273,199 @@ button.disabled=false;
 button.textContent="Generate Voiceover";
 }
 }
+
+
+// ---------------------------------
+// NEW AI SCENE PLANNER JAVASCRIPT
+// ---------------------------------
+
+async function generateScenes(){
+
+const script=document.getElementById("plannerScript").value.trim();
+const button=document.getElementById("plannerBtn");
+const status=document.getElementById("plannerStatus");
+const results=document.getElementById("plannerResults");
+
+if(!script){
+status.textContent="पहले अपनी कहानी या स्क्रिप्ट पेस्ट करें।";
+return;
+}
+
+button.disabled=true;
+button.textContent="AI Scenes तैयार कर रहा है...";
+status.textContent="कृपया प्रतीक्षा करें। आपकी कहानी का विश्लेषण हो रहा है...";
+results.innerHTML="";
+
+try{
+
+const response=await fetch("/api/plan-scenes",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({script:script})
+});
+
+if(!response.ok){
+
+let message="Scenes तैयार नहीं हो पाए।";
+
+try{
+const errorData=await response.json();
+message=errorData.detail||message;
+}catch(e){}
+
+throw new Error(message);
+}
+
+const data=await response.json();
+
+displaySceneResults(data);
+
+status.textContent="✅ आपके AI Scenes सफलतापूर्वक तैयार हो गए!";
+
+}catch(error){
+
+status.textContent="❌ "+error.message;
+
+}finally{
+
+button.disabled=false;
+button.textContent="✨ Generate AI Scenes";
+
+}
+
+}
+
+
+// ---------------------------------
+// DISPLAY SCENE RESULTS
+// ---------------------------------
+
+function displaySceneResults(data){
+
+const results=document.getElementById("plannerResults");
+
+results.innerHTML="";
+
+const summary=document.createElement("div");
+summary.className="scene-card";
+
+const summaryTitle=document.createElement("h3");
+summaryTitle.textContent="📖 Story Summary";
+
+const summaryText=document.createElement("p");
+summaryText.textContent=data.story_summary||"";
+
+const styleText=document.createElement("p");
+styleText.textContent="🎨 Visual Style: "+(data.visual_style||"");
+
+summary.append(summaryTitle,summaryText,styleText);
+results.appendChild(summary);
+
+
+// CHARACTERS
+
+const characterHeading=document.createElement("h2");
+characterHeading.textContent="👥 Characters";
+results.appendChild(characterHeading);
+
+(data.characters||[]).forEach(character=>{
+
+const card=document.createElement("div");
+card.className="character-card";
+
+const heading=document.createElement("h3");
+heading.textContent=character.character_id||"Character";
+
+const description=document.createElement("p");
+description.textContent=character.description||"";
+
+card.append(heading,description);
+results.appendChild(card);
+
+});
+
+
+// SCENES
+
+const sceneHeading=document.createElement("h2");
+sceneHeading.textContent="🎬 Scene Breakdown";
+results.appendChild(sceneHeading);
+
+(data.scenes||[]).forEach(scene=>{
+
+const card=document.createElement("div");
+card.className="scene-card";
+
+const heading=document.createElement("h3");
+heading.textContent="Scene "+scene.scene_number;
+
+const narration=document.createElement("p");
+narration.textContent="🗣️ Narration: "+(scene.narration||"");
+
+const prompt=document.createElement("p");
+prompt.textContent="🖼️ Image Prompt: "+(scene.image_prompt||"");
+
+const characters=document.createElement("p");
+characters.textContent="👤 Characters: "+((scene.character_ids||[]).join(", ")||"None");
+
+const setting=document.createElement("p");
+setting.textContent="🌄 Setting: "+(scene.setting||"");
+
+const camera=document.createElement("p");
+camera.textContent="📷 Camera: "+(scene.camera||"");
+
+const mood=document.createElement("p");
+mood.textContent="🎭 Mood: "+(scene.mood||"");
+
+const sounds=document.createElement("p");
+sounds.textContent="🔊 Sound Effects: "+((scene.sound_effects||[]).join(", ")||"None");
+
+const music=document.createElement("p");
+music.textContent="🎵 Music: "+(scene.music_cue||"");
+
+const copyButton=document.createElement("button");
+copyButton.className="copy-button";
+copyButton.textContent="📋 Copy Image Prompt";
+
+copyButton.onclick=async function(){
+
+try{
+await navigator.clipboard.writeText(scene.image_prompt||"");
+copyButton.textContent="✅ Copied!";
+}catch(error){
+copyButton.textContent="Copy नहीं हुआ";
+}
+
+};
+
+card.append(
+heading,
+narration,
+prompt,
+characters,
+setting,
+camera,
+mood,
+sounds,
+music,
+copyButton
+);
+
+results.appendChild(card);
+
+});
+
+if(!data.scenes||data.scenes.length===0){
+
+const empty=document.createElement("p");
+empty.textContent="AI ने कोई Scene नहीं लौटाया। दोबारा कोशिश करें।";
+results.appendChild(empty);
+
+}
+
+}
+
 </script>
+
 </body>
 </html>
