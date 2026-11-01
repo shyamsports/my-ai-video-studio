@@ -101,11 +101,12 @@ async def create_voiceover(data: VoiceRequest):
 
 
 # ---------------------------------
-# NEW AI SCENE PLANNER
+# AI SCENE PLANNER
 # ---------------------------------
 
 class SceneRequest(BaseModel):
     script: str
+    video_format: str
 
 
 class Character(BaseModel):
@@ -126,6 +127,8 @@ class Scene(BaseModel):
 
 
 class ScenePlan(BaseModel):
+    video_format: str
+    aspect_ratio: str
     story_summary: str
     visual_style: str
     characters: list[Character]
@@ -143,6 +146,33 @@ async def plan_scenes(data: SceneRequest):
     if len(script) > 50000:
         raise HTTPException(400, "स्क्रिप्ट बहुत लंबी है।")
 
+    if data.video_format not in ["landscape", "portrait"]:
+        raise HTTPException(
+            400,
+            "कृपया सही Video Format चुनें।"
+        )
+
+    if data.video_format == "landscape":
+        aspect_ratio = "16:9"
+        format_name = "Full YouTube Video"
+        framing_rules = """
+- Compose every image specifically for a wide 16:9 landscape frame.
+- Use horizontal compositions and cinematic wide shots where appropriate.
+- Keep important characters and story details comfortably inside the frame.
+- Use the horizontal space to show the environment and action clearly.
+"""
+    else:
+        aspect_ratio = "9:16"
+        format_name = "YouTube Shorts / Reels"
+        framing_rules = """
+- Compose every image specifically for a vertical 9:16 portrait frame.
+- Use vertical compositions and portrait-friendly camera framing.
+- Keep important characters, faces and story details inside the central safe area.
+- Avoid placing important actions near the extreme left and right edges.
+- Use foreground, middle ground and background effectively in the vertical frame.
+- Do not simply crop a landscape composition into a vertical image.
+"""
+
     api_key = os.environ.get("GEMINI_API_KEY")
 
     if not api_key:
@@ -156,6 +186,15 @@ You are an expert AI film director, storyboard artist,
 screenwriter and visual continuity supervisor.
 
 Create a detailed scene-by-scene visual plan from this script.
+
+VIDEO FORMAT:
+{format_name}
+
+ASPECT RATIO:
+{aspect_ratio}
+
+FORMAT-SPECIFIC COMPOSITION RULES:
+{framing_rules}
 
 IMPORTANT RULES:
 
@@ -178,6 +217,8 @@ IMPORTANT RULES:
 13. Do not add text, subtitles, logos or watermarks inside images
     unless the story specifically requires them.
 14. Create no more than 30 scenes in this first planning pass.
+15. Every image prompt must clearly follow the selected aspect ratio.
+16. Do not change the selected video format.
 
 SCRIPT:
 
@@ -208,7 +249,11 @@ SCRIPT:
 
         plan = ScenePlan.model_validate(result)
 
-        return plan.model_dump()
+        # Ensure the selected format is returned accurately.
+        result["video_format"] = format_name
+        result["aspect_ratio"] = aspect_ratio
+
+        return result
 
     except HTTPException:
         raise
@@ -224,4 +269,3 @@ SCRIPT:
     finally:
         if client:
             client.close()
-            
