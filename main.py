@@ -188,6 +188,13 @@ def split_text(text: str, max_size: int = CHUNK_SIZE):
 # HEALTH CHECK
 # --------------------------------------------------
 
+@app.get("/")
+async def home():
+    return FileResponse(
+        path="index.html",
+        media_type="text/html"
+    )
+
 @app.get("/health")
 async def health():
 
