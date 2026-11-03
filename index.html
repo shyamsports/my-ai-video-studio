@@ -1,485 +1,1493 @@
 
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#f5f5f7">
-<title>My AI Voice Studio</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#d9edff" />
 
-<style>
-:root {
-    --ink: #20212a;
-    --muted: #777b89;
-    --blue: #3978f6;
-    --glass: rgba(255,255,255,.68);
-}
-* { box-sizing: border-box; }
+  <title>My AI Voice Studio</title>
 
-body {
-    margin: 0;
-    min-height: 100vh;
-    padding: 35px 16px;
-    color: var(--ink);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    background:
-      radial-gradient(ellipse at 12% 12%, rgba(179,211,255,.8), transparent 34%),
-      radial-gradient(ellipse at 88% 18%, rgba(225,204,255,.75), transparent 32%),
-      radial-gradient(ellipse at 50% 100%, rgba(191,232,255,.8), transparent 42%),
-      linear-gradient(135deg,#f6f8ff,#eef2fb 48%,#f8f5ff);
-    background-attachment: fixed;
-}
+  <style>
+    :root {
+      --blue: #3989ef;
+      --blue-dark: #2168ca;
+      --purple: #8c70ed;
+      --pink: #e58cc8;
+      --text: #18304e;
+      --muted: #69809b;
+      --glass: rgba(255, 255, 255, 0.57);
+      --glass-border: rgba(255, 255, 255, 0.78);
+      --shadow: 0 22px 65px rgba(55, 105, 160, 0.15);
+      --radius: 28px;
+    }
 
-.page { width:100%; max-width:760px; margin:auto; }
+    * {
+      box-sizing: border-box;
+    }
 
-.header {
-    text-align:center;
-    padding:22px 10px 28px;
-    animation: rise .7s ease both;
-}
+    html {
+      scroll-behavior: smooth;
+    }
 
-.brand-icon {
-    width:66px;
-    height:66px;
-    margin:0 auto 17px;
-    display:grid;
-    place-items:center;
-    border:1px solid white;
-    border-radius:23px;
-    background:linear-gradient(145deg,#fff,#dceaff);
-    color:#3978f6;
-    font-size:32px;
-    box-shadow:0 16px 38px rgba(93,119,177,.16);
-}
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family:
+        -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, Helvetica, Arial, sans-serif;
+      background:
+        linear-gradient(180deg,
+          #b9e1ff 0%,
+          #d8edff 36%,
+          #e9f5ff 66%,
+          #d5e9f8 100%);
+      overflow-x: hidden;
+    }
 
-h1 {
-    margin:0;
-    font-size:clamp(30px,5vw,43px);
-    letter-spacing:-1.5px;
-    font-weight:750;
-}
+    button,
+    textarea,
+    select {
+      font: inherit;
+    }
 
-.subtitle {
-    margin:11px 0 0;
-    color:var(--muted);
-    font-size:15px;
-    line-height:1.6;
-}
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
 
-.panel {
-    padding:30px;
-    border:1px solid rgba(255,255,255,.9);
-    border-radius:30px;
-    background:var(--glass);
-    backdrop-filter:blur(26px) saturate(160%);
-    -webkit-backdrop-filter:blur(26px) saturate(160%);
-    box-shadow:0 24px 70px rgba(77,94,139,.13),
-               inset 1px 1px 0 rgba(255,255,255,.95);
-    animation:rise .8s .08s ease both;
-}
+    /* Natural sky background */
 
-.field { margin-bottom:22px; }
+    .landscape {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      overflow: hidden;
+      pointer-events: none;
+    }
 
-label {
-    display:block;
-    margin-bottom:10px;
-    font-size:14px;
-    font-weight:680;
-}
+    .sun {
+      position: absolute;
+      width: 190px;
+      height: 190px;
+      top: 7%;
+      right: 12%;
+      border-radius: 50%;
+      background: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.95) 0%,
+        rgba(255, 246, 210, 0.75) 35%,
+        rgba(255, 246, 210, 0) 72%
+      );
+      filter: blur(2px);
+    }
 
-select, textarea {
-    display:block;
-    width:100%;
-    border:1px solid rgba(210,218,235,.9);
-    border-radius:17px;
-    background:rgba(255,255,255,.78);
-    color:var(--ink);
-    padding:15px 16px;
-    font:inherit;
-    font-size:15px;
-    outline:none;
-    transition:.2s ease;
-}
+    .cloud {
+      position: absolute;
+      width: 180px;
+      height: 48px;
+      border-radius: 50px;
+      background: rgba(255, 255, 255, 0.44);
+      filter: blur(1px);
+      animation: cloudMove 34s linear infinite alternate;
+    }
 
-select:focus, textarea:focus {
-    border-color:rgba(57,120,246,.65);
-    box-shadow:0 0 0 4px rgba(57,120,246,.12);
-}
+    .cloud::before,
+    .cloud::after {
+      content: "";
+      position: absolute;
+      bottom: 10px;
+      border-radius: 50%;
+      background: inherit;
+    }
 
-.gender-switch {
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10px;
-    padding:6px;
-    border:1px solid rgba(210,218,235,.72);
-    border-radius:19px;
-    background:rgba(225,232,246,.55);
-}
+    .cloud::before {
+      left: 30px;
+      width: 65px;
+      height: 65px;
+    }
 
-.gender-option {
-    min-height:58px;
-    padding:11px;
-    border:1px solid transparent;
-    border-radius:14px;
-    color:#626a7a;
-    background:transparent;
-    font:inherit;
-    font-size:15px;
-    font-weight:650;
-    cursor:pointer;
-    transition:.22s ease;
-}
+    .cloud::after {
+      right: 30px;
+      width: 80px;
+      height: 80px;
+    }
 
-.gender-option:hover {
-    transform:translateY(-1px);
-}
+    .cloud-one {
+      top: 15%;
+      left: 5%;
+    }
 
-.gender-option[aria-pressed="true"] {
-    color:#245fe0;
-    border-color:white;
-    background:linear-gradient(145deg,#fff,#eff5ff);
-    box-shadow:0 5px 14px rgba(75,99,150,.12);
-}
+    .cloud-two {
+      top: 28%;
+      right: 5%;
+      transform: scale(0.7);
+      animation-duration: 45s;
+    }
 
-textarea {
-    min-height:300px;
-    resize:vertical;
-    line-height:1.75;
-}
+    .mountains {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 38%;
+    }
 
-textarea::placeholder { color:#a1a6b3; }
+    .mountain-back {
+      position: absolute;
+      bottom: 10%;
+      left: -10%;
+      width: 120%;
+      height: 75%;
+      background: linear-gradient(145deg, #b4d8e8, #8bb8d0);
+      clip-path: polygon(
+        0 75%, 12% 38%, 22% 64%, 39% 12%,
+        53% 62%, 68% 28%, 83% 65%, 94% 38%,
+        100% 65%, 100% 100%, 0 100%
+      );
+      opacity: 0.65;
+    }
 
-.counter-row {
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:10px;
-    margin-top:10px;
-    font-size:12px;
-    color:var(--muted);
-}
+    .mountain-front {
+      position: absolute;
+      bottom: 0;
+      left: -5%;
+      width: 110%;
+      height: 62%;
+      background: linear-gradient(160deg, #9ccbbd, #6cae9e);
+      clip-path: polygon(
+        0 68%, 14% 35%, 28% 62%, 42% 24%,
+        57% 65%, 73% 34%, 88% 60%, 100% 38%,
+        100% 100%, 0 100%
+      );
+      opacity: 0.52;
+    }
 
-#wordCount { font-weight:700; color:#3978f6; }
-#wordCount.over { color:#dc3545; }
+    .ground {
+      position: absolute;
+      bottom: -8%;
+      left: -10%;
+      width: 120%;
+      height: 34%;
+      border-radius: 50% 50% 0 0;
+      background: linear-gradient(180deg, #a8d2b7, #77b59b);
+      opacity: 0.48;
+    }
 
-.hint {
-    margin:9px 2px 0;
-    color:var(--muted);
-    font-size:12px;
-    line-height:1.6;
-}
+    .tree-line {
+      position: absolute;
+      bottom: 10%;
+      left: 0;
+      width: 100%;
+      height: 120px;
+      opacity: 0.25;
+      background:
+        radial-gradient(ellipse at 5% 80%, #397e70 0 20px, transparent 21px),
+        radial-gradient(ellipse at 9% 75%, #397e70 0 30px, transparent 31px),
+        radial-gradient(ellipse at 17% 90%, #397e70 0 24px, transparent 25px),
+        radial-gradient(ellipse at 78% 85%, #397e70 0 25px, transparent 26px),
+        radial-gradient(ellipse at 85% 75%, #397e70 0 34px, transparent 35px),
+        radial-gradient(ellipse at 94% 90%, #397e70 0 26px, transparent 27px);
+    }
 
-#generateBtn {
-    width:100%;
-    border:1px solid rgba(255,255,255,.5);
-    border-radius:17px;
-    padding:16px 20px;
-    color:white;
-    background:linear-gradient(135deg,#5b91ff,#3978f6 48%,#2863e7);
-    box-shadow:0 10px 24px rgba(48,105,226,.25);
-    font:inherit;
-    font-size:16px;
-    font-weight:700;
-    cursor:pointer;
-    transition:.2s ease;
-}
+    @keyframes cloudMove {
+      from { translate: -12px 0; }
+      to { translate: 25px 0; }
+    }
 
-#generateBtn:hover {
-    transform:translateY(-2px);
-    box-shadow:0 14px 30px rgba(48,105,226,.3);
-}
+    /* Main layout */
 
-#generateBtn:active { transform:scale(.985); }
+    .page {
+      width: min(100% - 32px, 1050px);
+      margin: 0 auto;
+      padding: 34px 0 55px;
+    }
 
-#generateBtn:disabled {
-    opacity:.7;
-    cursor:wait;
-    transform:none;
-}
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 35px;
+    }
 
-#status {
-    min-height:25px;
-    margin-top:16px;
-    color:var(--muted);
-    text-align:center;
-    line-height:1.6;
-    overflow-wrap:anywhere;
-    font-size:14px;
-}
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
 
-audio {
-    display:none;
-    width:100%;
-    margin-top:20px;
-}
+    .brand-icon {
+      width: 45px;
+      height: 45px;
+      display: grid;
+      place-items: center;
+      color: white;
+      font-size: 21px;
+      border-radius: 15px;
+      background: linear-gradient(145deg, #5aa7fa, #8b75ed);
+      box-shadow: 0 8px 20px rgba(75, 129, 220, 0.25);
+    }
 
-.download {
-    display:none;
-    margin-top:14px;
-    padding:15px;
-    border:1px solid rgba(57,120,246,.18);
-    border-radius:16px;
-    background:rgba(231,240,255,.85);
-    color:#2863d9;
-    text-align:center;
-    text-decoration:none;
-    font-weight:700;
-}
+    .brand-name {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+    }
 
-.download:hover { background:#e0ecff; }
+    .brand-caption {
+      margin-top: 3px;
+      font-size: 11px;
+      color: var(--muted);
+    }
 
-.footer {
-    padding:22px 8px 4px;
-    color:var(--muted);
-    text-align:center;
-    font-size:12px;
-}
+    .sound-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 15px;
+      color: #49627d;
+      border: 1px solid rgba(255,255,255,0.8);
+      border-radius: 30px;
+      background: rgba(255,255,255,0.42);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      cursor: pointer;
+      transition: 0.25s ease;
+      font-size: 12px;
+      font-weight: 650;
+    }
 
-@keyframes rise {
-    from { opacity:0; transform:translateY(14px); }
-    to { opacity:1; transform:translateY(0); }
-}
+    .sound-toggle:hover {
+      background: rgba(255,255,255,0.72);
+      transform: translateY(-2px);
+    }
 
-@media(max-width:520px) {
-    body { padding:16px 11px; }
-    .panel { padding:22px 17px; border-radius:25px; }
-    textarea { min-height:240px; }
-}
-</style>
+    .hero {
+      text-align: center;
+      margin: 0 auto 28px;
+      max-width: 700px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 13px;
+      border: 1px solid rgba(255,255,255,0.75);
+      border-radius: 30px;
+      color: #4c78aa;
+      background: rgba(255,255,255,0.43);
+      font-size: 11px;
+      font-weight: 750;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      backdrop-filter: blur(12px);
+    }
+
+    .hero h1 {
+      margin: 17px 0 10px;
+      font-size: clamp(34px, 6vw, 57px);
+      line-height: 1.08;
+      letter-spacing: -2.3px;
+      font-weight: 850;
+      color: #193d65;
+    }
+
+    .gradient-text {
+      background: linear-gradient(100deg, #3588e8, #8b68e9 55%, #d77dbd);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero p {
+      margin: 0 auto;
+      max-width: 570px;
+      color: #58728f;
+      font-size: 14px;
+      line-height: 1.75;
+    }
+
+    /* Main glass panel */
+
+    .studio {
+      position: relative;
+      overflow: hidden;
+      padding: clamp(20px, 4vw, 38px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      background: var(--glass);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(28px) saturate(145%);
+      -webkit-backdrop-filter: blur(28px) saturate(145%);
+      animation: panelEnter 0.8s ease both;
+    }
+
+    .studio::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 7%;
+      width: 86%;
+      height: 1px;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,255,255,0.95),
+        transparent
+      );
+    }
+
+    @keyframes panelEnter {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 17px;
+      font-size: 16px;
+      font-weight: 800;
+      color: #27496d;
+    }
+
+    .section-number {
+      width: 27px;
+      height: 27px;
+      display: grid;
+      place-items: center;
+      border-radius: 9px;
+      color: white;
+      font-size: 12px;
+      background: linear-gradient(145deg, #65aaf2, #9479e9);
+      box-shadow: 0 5px 12px rgba(89, 137, 220, 0.2);
+    }
+
+    /* Voice selector */
+
+    .voice-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 13px;
+      margin-bottom: 25px;
+    }
+
+    .voice-card {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      min-height: 76px;
+      padding: 14px;
+      border: 1px solid rgba(255,255,255,0.86);
+      border-radius: 18px;
+      background: rgba(255,255,255,0.43);
+      cursor: pointer;
+      text-align: left;
+      transition:
+        transform 0.25s ease,
+        background 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
+    }
+
+    .voice-card:hover {
+      transform: translateY(-3px);
+      background: rgba(255,255,255,0.72);
+      box-shadow: 0 9px 23px rgba(64, 119, 176, 0.1);
+    }
+
+    .voice-card.active {
+      border-color: rgba(67, 137, 232, 0.65);
+      background: rgba(255,255,255,0.84);
+      box-shadow:
+        0 0 0 3px rgba(75, 145, 235, 0.10),
+        0 10px 25px rgba(68, 122, 190, 0.12);
+    }
+
+    .voice-avatar {
+      flex: 0 0 43px;
+      width: 43px;
+      height: 43px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      font-size: 21px;
+      background: linear-gradient(145deg, #d7eaff, #e8dcff);
+      transition: transform 0.25s ease;
+    }
+
+    .voice-card.active .voice-avatar {
+      transform: scale(1.08) rotate(-4deg);
+    }
+
+    .voice-card[data-gender="male"] .voice-avatar {
+      background: linear-gradient(145deg, #d1eaff, #d8e5ff);
+    }
+
+    .voice-info {
+      min-width: 0;
+    }
+
+    .voice-title {
+      display: block;
+      font-size: 14px;
+      font-weight: 800;
+      color: #294a6e;
+    }
+
+    .voice-description {
+      display: block;
+      margin-top: 4px;
+      color: #7890a9;
+      font-size: 11px;
+    }
+
+    .selected-check {
+      display: none;
+      margin-left: auto;
+      color: #3989e7;
+      font-size: 17px;
+      font-weight: 900;
+    }
+
+    .voice-card.active .selected-check {
+      display: block;
+    }
+
+    /* Settings */
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .field label {
+      display: block;
+      margin: 0 0 9px;
+      color: #496785;
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .select-wrap {
+      position: relative;
+    }
+
+    .field select {
+      width: 100%;
+      min-height: 49px;
+      appearance: none;
+      -webkit-appearance: none;
+      padding: 0 40px 0 14px;
+      outline: none;
+      color: #29496b;
+      font-size: 13px;
+      font-weight: 650;
+      border: 1px solid rgba(255,255,255,0.9);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.58);
+      box-shadow: inset 0 1px 3px rgba(255,255,255,0.6);
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .field select:focus {
+      border-color: #76a9ed;
+      box-shadow: 0 0 0 3px rgba(75,145,235,0.12);
+    }
+
+    .select-wrap::after {
+      content: "⌄";
+      position: absolute;
+      top: 9px;
+      right: 15px;
+      color: #6684a5;
+      font-size: 20px;
+      pointer-events: none;
+    }
+
+    /* Script input */
+
+    .script-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .script-header .section-heading {
+      margin: 0;
+    }
+
+    .counter {
+      color: #7189a3;
+      font-size: 11px;
+      font-weight: 650;
+      text-align: right;
+    }
+
+    .counter.warning {
+      color: #d17b42;
+    }
+
+    .counter.error {
+      color: #d84e62;
+    }
+
+    .script-box {
+      position: relative;
+    }
+
+    textarea {
+      display: block;
+      width: 100%;
+      min-height: 220px;
+      resize: vertical;
+      padding: 18px;
+      outline: none;
+      color: #294763;
+      font-size: 14px;
+      line-height: 1.8;
+      border: 1px solid rgba(255,255,255,0.9);
+      border-radius: 18px;
+      background: rgba(255,255,255,0.54);
+      box-shadow: inset 0 2px 8px rgba(76, 119, 160, 0.035);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    textarea::placeholder {
+      color: #91a7bc;
+    }
+
+    textarea:focus {
+      border-color: rgba(77, 143, 229, 0.72);
+      box-shadow: 0 0 0 4px rgba(75,145,235,0.10);
+    }
+
+    .script-note {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-top: 10px;
+      color: #7890a7;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    /* Generate button */
+
+    .generate-area {
+      margin-top: 25px;
+    }
+
+    .generate-button {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 11px;
+      width: 100%;
+      min-height: 59px;
+      overflow: hidden;
+      padding: 15px 22px;
+      color: white;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.15px;
+      border: 1px solid rgba(255,255,255,0.5);
+      border-radius: 17px;
+      background: linear-gradient(105deg, #398eea, #766ee8 58%, #a16fdf);
+      box-shadow:
+        0 10px 24px rgba(80, 111, 216, 0.28),
+        inset 0 1px 1px rgba(255,255,255,0.5);
+      cursor: pointer;
+      transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        filter 0.2s ease;
+    }
+
+    .generate-button::before {
+      content: "";
+      position: absolute;
+      top: -80%;
+      left: -40%;
+      width: 35%;
+      height: 260%;
+      transform: rotate(25deg);
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,255,255,0.23),
+        transparent
+      );
+      transition: left 0.65s ease;
+    }
+
+    .generate-button:hover:not(:disabled) {
+      transform: translateY(-3px);
+      filter: brightness(1.05);
+      box-shadow:
+        0 15px 30px rgba(80, 111, 216, 0.33),
+        inset 0 1px 1px rgba(255,255,255,0.5);
+    }
+
+    .generate-button:hover:not(:disabled)::before {
+      left: 120%;
+    }
+
+    .generate-button:active:not(:disabled) {
+      transform: scale(0.985);
+      box-shadow: 0 5px 13px rgba(80, 111, 216, 0.22);
+    }
+
+    .generate-button:disabled {
+      cursor: not-allowed;
+      opacity: 0.72;
+      filter: saturate(0.75);
+    }
+
+    .button-icon {
+      font-size: 19px;
+    }
+
+    .spinner {
+      display: none;
+      width: 19px;
+      height: 19px;
+      border: 2px solid rgba(255,255,255,0.38);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    .generate-button.loading .spinner {
+      display: inline-block;
+    }
+
+    .generate-button.loading .button-icon {
+      display: none;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-message {
+      display: none;
+      margin: 12px 0 0;
+      color: #6681a0;
+      font-size: 12px;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .loading-message.visible {
+      display: block;
+    }
+
+    /* Status */
+
+    .status {
+      display: none;
+      margin-top: 16px;
+      padding: 12px 15px;
+      border-radius: 13px;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .status.visible {
+      display: block;
+    }
+
+    .status.error {
+      color: #a13c4d;
+      border: 1px solid rgba(222, 119, 132, 0.25);
+      background: rgba(255, 231, 235, 0.75);
+    }
+
+    .status.success {
+      color: #277452;
+      border: 1px solid rgba(92, 182, 139, 0.25);
+      background: rgba(226, 250, 237, 0.75);
+    }
+
+    /* Audio output */
+
+    .output {
+      display: none;
+      margin-top: 27px;
+      padding: 21px;
+      border: 1px solid rgba(255,255,255,0.9);
+      border-radius: 20px;
+      background: rgba(255,255,255,0.62);
+      box-shadow: 0 10px 30px rgba(58, 105, 153, 0.08);
+      animation: outputEnter 0.45s ease both;
+    }
+
+    .output.visible {
+      display: block;
+    }
+
+    @keyframes outputEnter {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .output-heading {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      margin-bottom: 15px;
+    }
+
+    .output-icon {
+      width: 39px;
+      height: 39px;
+      display: grid;
+      place-items: center;
+      color: white;
+      font-size: 18px;
+      border-radius: 13px;
+      background: linear-gradient(145deg, #58b9a1, #398fd8);
+    }
+
+    .output-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #2c506f;
+    }
+
+    .output-subtitle {
+      margin-top: 3px;
+      color: #7a91a8;
+      font-size: 11px;
+    }
+
+    audio {
+      display: block;
+      width: 100%;
+      height: 47px;
+      margin: 10px 0 17px;
+    }
+
+    .download-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      width: 100%;
+      min-height: 48px;
+      padding: 12px 18px;
+      color: #2865a8;
+      font-size: 13px;
+      font-weight: 800;
+      text-decoration: none;
+      border: 1px solid rgba(83, 151, 224, 0.28);
+      border-radius: 14px;
+      background: linear-gradient(
+        110deg,
+        rgba(222,240,255,0.9),
+        rgba(239,232,255,0.9)
+      );
+      transition: 0.2s ease;
+    }
+
+    .download-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 7px 17px rgba(75, 130, 200, 0.12);
+      background: white;
+    }
+
+    .download-note {
+      margin: 10px 0 0;
+      color: #8196aa;
+      font-size: 10px;
+      text-align: center;
+    }
+
+    /* Footer */
+
+    .footer {
+      padding: 24px 8px 0;
+      color: #7189a1;
+      font-size: 11px;
+      line-height: 1.7;
+      text-align: center;
+    }
+
+    .footer strong {
+      color: #4b6f92;
+    }
+
+    /* Ripple */
+
+    .ripple {
+      position: absolute;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      pointer-events: none;
+      background: rgba(255,255,255,0.42);
+      transform: translate(-50%, -50%) scale(0);
+      animation: rippleEffect 0.65s ease-out forwards;
+    }
+
+    @keyframes rippleEffect {
+      to {
+        transform: translate(-50%, -50%) scale(15);
+        opacity: 0;
+      }
+    }
+
+    /* Responsive */
+
+    @media (max-width: 620px) {
+      .page {
+        width: min(100% - 22px, 540px);
+        padding-top: 20px;
+      }
+
+      .topbar {
+        margin-bottom: 27px;
+      }
+
+      .hero {
+        margin-bottom: 22px;
+      }
+
+      .hero h1 {
+        letter-spacing: -1.5px;
+      }
+
+      .hero p {
+        font-size: 13px;
+      }
+
+      .studio {
+        padding: 19px 15px;
+        border-radius: 23px;
+      }
+
+      .voice-grid {
+        gap: 9px;
+      }
+
+      .voice-card {
+        gap: 9px;
+        padding: 11px 9px;
+        min-height: 72px;
+      }
+
+      .voice-avatar {
+        width: 37px;
+        height: 37px;
+        flex-basis: 37px;
+        font-size: 18px;
+      }
+
+      .voice-title {
+        font-size: 12px;
+      }
+
+      .voice-description {
+        font-size: 10px;
+      }
+
+      .settings-grid {
+        gap: 10px;
+      }
+
+      .field select {
+        font-size: 12px;
+        padding-left: 10px;
+      }
+
+      textarea {
+        min-height: 200px;
+        padding: 14px;
+        font-size: 13px;
+      }
+
+      .counter {
+        font-size: 10px;
+      }
+
+      .script-header {
+        align-items: flex-start;
+      }
+
+      .sun {
+        width: 130px;
+        height: 130px;
+      }
+    }
+
+    @media (max-width: 370px) {
+      .voice-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .settings-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .brand-name {
+        font-size: 14px;
+      }
+
+      .sound-toggle {
+        padding: 9px 11px;
+        font-size: 11px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
 </head>
 
 <body>
-<main class="page">
+  <div class="landscape" aria-hidden="true">
+    <div class="sun"></div>
+    <div class="cloud cloud-one"></div>
+    <div class="cloud cloud-two"></div>
+    <div class="mountains">
+      <div class="mountain-back"></div>
+      <div class="mountain-front"></div>
+      <div class="ground"></div>
+      <div class="tree-line"></div>
+    </div>
+  </div>
 
-<header class="header">
-    <div class="brand-icon">♫</div>
-    <h1>My AI Voice Studio</h1>
-    <p class="subtitle">
-        अपनी स्क्रिप्ट को प्राकृतिक AI आवाज़ में बदलें।
-    </p>
-</header>
-
-<section class="panel">
-
-    <div class="field">
-        <label>आवाज़ चुनें</label>
-
-        <div class="gender-switch" role="group" aria-label="आवाज़ चुनें">
-            <button class="gender-option"
-                    type="button"
-                    data-gender="female"
-                    aria-pressed="true">
-                ♀ Female
-            </button>
-
-            <button class="gender-option"
-                    type="button"
-                    data-gender="male"
-                    aria-pressed="false">
-                ♂ Male
-            </button>
+  <main class="page">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">♫</div>
+        <div>
+          <div class="brand-name">My AI Voice Studio</div>
+          <div class="brand-caption">Your words, beautifully spoken</div>
         </div>
-    </div>
+      </div>
 
-    <div class="field">
-        <label for="language">भाषा चुनें</label>
-        <select id="language">
-            <option value="hi" selected>हिंदी</option>
-            <option value="en">English (India)</option>
-        </select>
-    </div>
+      <button
+        class="sound-toggle"
+        id="soundToggle"
+        type="button"
+        aria-pressed="false"
+      >
+        <span id="soundIcon">♪</span>
+        <span id="soundLabel">Sound Off</span>
+      </button>
+    </header>
 
-    <div class="field">
-        <label for="style">बोलने का अंदाज़ चुनें</label>
-        <select id="style">
-            <option value="story">Storytelling — कहानी सुनाने का अंदाज़</option>
-            <option value="documentary">Documentary — गंभीर और जानकारीपूर्ण</option>
-            <option value="explainer">Explainer — सरल और दोस्ताना</option>
-        </select>
-    </div>
+    <section class="hero">
+      <div class="eyebrow">
+        <span>✦</span>
+        AI Voice Generation Studio
+      </div>
 
-    <div class="field">
-        <label for="script">अपनी स्क्रिप्ट यहाँ पेस्ट करें</label>
+      <h1>
+        Give Your Words<br />
+        <span class="gradient-text">A Natural Voice.</span>
+      </h1>
 
+      <p>
+        अपनी स्क्रिप्ट लिखें, अपनी पसंद की आवाज़ चुनें और
+        कुछ ही steps में अपनी audio तैयार करें।
+      </p>
+    </section>
+
+    <section class="studio" aria-label="Voice generation studio">
+      <div class="section-heading">
+        <span class="section-number">1</span>
+        Choose Your Voice
+      </div>
+
+      <div class="voice-grid" role="group" aria-label="Select voice gender">
+        <button
+          class="voice-card active"
+          type="button"
+          data-gender="female"
+          aria-pressed="true"
+        >
+          <span class="voice-avatar" aria-hidden="true">👩🏻</span>
+          <span class="voice-info">
+            <span class="voice-title">Female Voice</span>
+            <span class="voice-description">Soft & natural</span>
+          </span>
+          <span class="selected-check" aria-hidden="true">✓</span>
+        </button>
+
+        <button
+          class="voice-card"
+          type="button"
+          data-gender="male"
+          aria-pressed="false"
+        >
+          <span class="voice-avatar" aria-hidden="true">👨🏻</span>
+          <span class="voice-info">
+            <span class="voice-title">Male Voice</span>
+            <span class="voice-description">Clear & natural</span>
+          </span>
+          <span class="selected-check" aria-hidden="true">✓</span>
+        </button>
+      </div>
+
+      <div class="section-heading">
+        <span class="section-number">2</span>
+        Voice Settings
+      </div>
+
+      <div class="settings-grid">
+        <div class="field">
+          <label for="language">Language</label>
+          <div class="select-wrap">
+            <select id="language">
+              <option value="hi" selected>Hindi (India)</option>
+              <option value="en">English (India)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="style">Speaking Style</label>
+          <div class="select-wrap">
+            <select id="style">
+              <option value="story" selected>Storytelling</option>
+              <option value="documentary">Documentary</option>
+              <option value="explainer">Explainer</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="script-header">
+        <div class="section-heading">
+          <span class="section-number">3</span>
+          Your Script
+        </div>
+
+        <div class="counter" id="counter" aria-live="polite">
+          0 / 10,000 words
+        </div>
+      </div>
+
+      <div class="script-box">
         <textarea
-            id="script"
-            maxlength="200000"
-            placeholder="अपनी पूरी स्क्रिप्ट यहाँ पेस्ट करें..."
-        ></textarea>
+          id="script"
+          maxlength="200000"
+          placeholder="यहाँ अपनी पूरी स्क्रिप्ट लिखें या paste करें...
 
-        <div class="counter-row">
-            <span id="wordCount">0 / 10,000 शब्द</span>
-            <span id="charCount">0 characters</span>
+आप Hindi या English में अपनी स्क्रिप्ट लिख सकते हैं। बेहतर natural voice के लिए punctuation और full stops का सही इस्तेमाल करें।"
+          aria-label="Enter your script"
+        ></textarea>
+      </div>
+
+      <div class="script-note">
+        <span>ⓘ</span>
+        <span>
+          Maximum 10,000 words और 200,000 characters तक।
+          Script की length के अनुसार generation में समय लग सकता है।
+        </span>
+      </div>
+
+      <div class="generate-area">
+        <button class="generate-button" id="generateButton" type="button">
+          <span class="button-icon" aria-hidden="true">✦</span>
+          <span class="spinner" aria-hidden="true"></span>
+          <span id="buttonText">Generate Voice</span>
+        </button>
+
+        <p class="loading-message" id="loadingMessage" aria-live="polite">
+          आपकी voice तैयार की जा रही है। लंबी scripts में थोड़ा समय लग सकता है।
+          कृपया इस पेज को खुला रखें।
+        </p>
+      </div>
+
+      <div class="status" id="status" role="status" aria-live="polite"></div>
+
+      <section class="output" id="output" aria-label="Generated audio">
+        <div class="output-heading">
+          <div class="output-icon" aria-hidden="true">♫</div>
+          <div>
+            <div class="output-title">Your Voice Is Ready!</div>
+            <div class="output-subtitle">
+              पहले पूरी audio सुनें। पसंद आने पर MP3 download करें।
+            </div>
+          </div>
         </div>
 
-        <p class="hint">
-            अधिकतम 10,000 शब्द। लंबी स्क्रिप्ट का Voiceover बनने में काफी समय लग सकता है।
-            प्रक्रिया पूरी होने तक पेज खुला रखें।
+        <audio id="audioPlayer" controls preload="metadata">
+          Your browser does not support audio playback.
+        </audio>
+
+        <a
+          class="download-button"
+          id="downloadButton"
+          href="#"
+          download="my-ai-voice.mp3"
+        >
+          <span aria-hidden="true">↓</span>
+          Download MP3
+        </a>
+
+        <p class="download-note">
+          Download अपने आप शुरू नहीं होगा। ऊपर बटन दबाने पर ही MP3 download होगी।
         </p>
-    </div>
+      </section>
+    </section>
 
-    <button id="generateBtn" type="button">
-        Generate Voice
-    </button>
+    <footer class="footer">
+      <strong>My AI Voice Studio</strong><br />
+      Create, listen and download your voiceovers.<br />
+      Voice generation requires an active internet connection.
+    </footer>
+  </main>
 
-    <div id="status" role="status" aria-live="polite"></div>
+  <script>
+    const MAX_WORDS = 10000;
+    const MAX_CHARACTERS = 200000;
 
-    <audio id="audioPlayer" controls preload="none"></audio>
+    const scriptInput = document.getElementById("script");
+    const counter = document.getElementById("counter");
+    const generateButton = document.getElementById("generateButton");
+    const buttonText = document.getElementById("buttonText");
+    const loadingMessage = document.getElementById("loadingMessage");
+    const statusBox = document.getElementById("status");
+    const output = document.getElementById("output");
+    const audioPlayer = document.getElementById("audioPlayer");
+    const downloadButton = document.getElementById("downloadButton");
+    const languageSelect = document.getElementById("language");
+    const styleSelect = document.getElementById("style");
 
-    <a id="downloadLink"
-       class="download"
-       download="voiceover.mp3">
-       ↓ Download MP3
-    </a>
+    const voiceCards = document.querySelectorAll(".voice-card");
 
-</section>
+    let selectedGender = "female";
+    let currentAudioUrl = null;
+    let isGenerating = false;
+    let soundEnabled = false;
+    let audioContext = null;
 
-<footer class="footer">
-    My AI Voice Studio
-</footer>
+    function getWordCount(text) {
+      const trimmed = text.trim();
+      return trimmed ? trimmed.split(/\s+/u).length : 0;
+    }
 
-</main>
+    function updateCounter() {
+      const words = getWordCount(scriptInput.value);
+      const characters = scriptInput.value.length;
 
-<script>
-const MAX_WORDS = 10000;
+      counter.textContent =
+        `${words.toLocaleString("en-IN")} / ${MAX_WORDS.toLocaleString("en-IN")} words`;
 
-let selectedGender = "female";
-let currentAudioUrl = null;
+      if (words > MAX_WORDS) {
+        counter.className = "counter error";
+        counter.textContent += " · Limit exceeded";
+      } else if (words >= MAX_WORDS * 0.9) {
+        counter.className = "counter warning";
+      } else {
+        counter.className = "counter";
+      }
 
-const scriptInput = document.getElementById("script");
-const wordCount = document.getElementById("wordCount");
-const charCount = document.getElementById("charCount");
-const generateBtn = document.getElementById("generateBtn");
-const statusBox = document.getElementById("status");
-const audioPlayer = document.getElementById("audioPlayer");
-const downloadLink = document.getElementById("downloadLink");
+      if (characters >= MAX_CHARACTERS) {
+        counter.textContent += " · Character limit reached";
+      }
 
-function countWords(text) {
-    const cleaned = text.trim();
-    return cleaned ? cleaned.split(/\s+/u).length : 0;
-}
+      generateButton.disabled =
+        isGenerating ||
+        words === 0 ||
+        words > MAX_WORDS ||
+        characters > MAX_CHARACTERS;
+    }
 
-function updateCounter() {
-    const words = countWords(scriptInput.value);
-    const characters = scriptInput.value.length;
+    scriptInput.addEventListener("input", updateCounter);
 
-    wordCount.textContent =
-        words.toLocaleString("en-IN") +
-        " / 10,000 शब्द";
+    voiceCards.forEach((card) => {
+      card.addEventListener("click", () => {
+        selectedGender = card.dataset.gender;
 
-    charCount.textContent =
-        characters.toLocaleString("en-IN") +
-        " characters";
-
-    wordCount.classList.toggle("over", words > MAX_WORDS);
-    generateBtn.disabled = words > MAX_WORDS;
-}
-
-scriptInput.addEventListener("input", updateCounter);
-
-document.querySelectorAll(".gender-option").forEach((option) => {
-    option.addEventListener("click", () => {
-        selectedGender = option.dataset.gender;
-
-        document.querySelectorAll(".gender-option").forEach((button) => {
-            button.setAttribute(
-                "aria-pressed",
-                String(button.dataset.gender === selectedGender)
-            );
+        voiceCards.forEach((item) => {
+          const active = item === card;
+          item.classList.toggle("active", active);
+          item.setAttribute("aria-pressed", String(active));
         });
+
+        playClickSound();
+      });
     });
-});
 
-async function generateVoice() {
-    const script = scriptInput.value.trim();
-    const words = countWords(script);
-
-    if (!script) {
-        statusBox.textContent = "पहले अपनी स्क्रिप्ट पेस्ट करें।";
-        return;
+    function showStatus(message, type) {
+      statusBox.textContent = message;
+      statusBox.className = `status visible ${type}`;
     }
 
-    if (words > MAX_WORDS) {
-        statusBox.textContent =
-            "आपकी स्क्रिप्ट 10,000 शब्दों से ज्यादा है।";
-        return;
+    function clearStatus() {
+      statusBox.textContent = "";
+      statusBox.className = "status";
     }
 
-    const language = document.getElementById("language").value;
-    const style = document.getElementById("style").value;
+    function setLoading(loading) {
+      isGenerating = loading;
+      generateButton.classList.toggle("loading", loading);
+      loadingMessage.classList.toggle("visible", loading);
 
-    generateBtn.disabled = true;
-    generateBtn.textContent = "आवाज़ तैयार हो रही है...";
+      buttonText.textContent = loading
+        ? "Generating Your Voice..."
+        : "Generate Voice";
 
-    statusBox.textContent =
-        "आपकी स्क्रिप्ट प्रोसेस हो रही है। कृपया प्रतीक्षा करें।";
+      generateButton.setAttribute("aria-busy", String(loading));
 
-    audioPlayer.pause();
-    audioPlayer.removeAttribute("src");
-    audioPlayer.style.display = "none";
-    downloadLink.style.display = "none";
+      updateCounter();
+    }
 
-    try {
+    function releasePreviousAudio() {
+      audioPlayer.pause();
+      audioPlayer.removeAttribute("src");
+      audioPlayer.load();
+
+      downloadButton.removeAttribute("href");
+
+      if (currentAudioUrl) {
+        URL.revokeObjectURL(currentAudioUrl);
+        currentAudioUrl = null;
+      }
+    }
+
+    async function generateVoice() {
+      if (isGenerating) return;
+
+      const script = scriptInput.value.trim();
+      const wordCount = getWordCount(script);
+
+      if (!script) {
+        showStatus("कृपया पहले अपनी स्क्रिप्ट लिखें।", "error");
+        scriptInput.focus();
+        return;
+      }
+
+      if (wordCount > MAX_WORDS) {
+        showStatus(
+          `आपकी स्क्रिप्ट में ${wordCount.toLocaleString("en-IN")} शब्द हैं। अधिकतम ${MAX_WORDS.toLocaleString("en-IN")} शब्दों की अनुमति है।`,
+          "error"
+        );
+        return;
+      }
+
+      if (script.length > MAX_CHARACTERS) {
+        showStatus("स्क्रिप्ट character limit से बड़ी है।", "error");
+        return;
+      }
+
+      clearStatus();
+      releasePreviousAudio();
+      output.classList.remove("visible");
+      setLoading(true);
+
+      try {
         const response = await fetch("/api/voiceover", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                script: script,
-                gender: selectedGender,
-                language: language,
-                style: style
-            })
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            script: script,
+            gender: selectedGender,
+            language: languageSelect.value,
+            style: styleSelect.value
+          })
         });
 
         if (!response.ok) {
-            let message = "ऑडियो नहीं बन पाया।";
+          let errorMessage = "Voice generate नहीं हो पाया। कृपया दोबारा कोशिश करें।";
 
-            try {
-                const errorData = await response.json();
-                message = errorData.detail || message;
-            } catch (error) {}
+          try {
+            const errorData = await response.json();
 
-            throw new Error(message);
+            if (errorData && errorData.detail) {
+              errorMessage = errorData.detail;
+            }
+          } catch (_) {
+            // Keep the default error message if the response is not JSON.
+          }
+
+          throw new Error(errorMessage);
+        }
+
+        const contentType = response.headers.get("content-type") || "";
+
+        if (!contentType.includes("audio/")) {
+          throw new Error(
+            "Server से सही audio file नहीं मिली। कृपया थोड़ी देर बाद कोशिश करें।"
+          );
         }
 
         const audioBlob = await response.blob();
 
-        if (!audioBlob.size) {
-            throw new Error("खाली ऑडियो मिला। दोबारा कोशिश करें।");
-        }
-
-        if (currentAudioUrl) {
-            URL.revokeObjectURL(currentAudioUrl);
+        if (!audioBlob || audioBlob.size === 0) {
+          throw new Error("Audio file खाली मिली। कृपया दोबारा कोशिश करें।");
         }
 
         currentAudioUrl = URL.createObjectURL(audioBlob);
 
         audioPlayer.src = currentAudioUrl;
-        audioPlayer.style.display = "block";
+        downloadButton.href = currentAudioUrl;
 
-        downloadLink.href = currentAudioUrl;
-        downloadLink.style.display = "block";
+        output.classList.add("visible");
 
-        statusBox.textContent =
-            "आपका पूरा Voiceover तैयार है! अब सुनें या MP3 डाउनलोड करें।";
+        showStatus(
+          "आपकी audio तैयार है! पहले यहीं सुनें, फिर पसंद आने पर MP3 download करें।",
+          "success"
+        );
 
-    } catch (error) {
-        statusBox.textContent =
-            "समस्या: " + error.message +
-            " अगर स्क्रिप्ट बहुत लंबी है, तो सर्वर की समय सीमा भी कारण हो सकती है।";
+        output.scrollIntoView({
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+            ? "auto"
+            : "smooth",
+          block: "nearest"
+        });
 
-    } finally {
-        generateBtn.disabled = countWords(scriptInput.value) > MAX_WORDS;
-        generateBtn.textContent = "Generate Voice";
+      } catch (error) {
+        console.error("Voice generation error:", error);
+
+        showStatus(
+          error.message ||
+          "कुछ समस्या हुई। अपना internet connection जाँचें और दोबारा कोशिश करें।",
+          "error"
+        );
+
+      } finally {
+        setLoading(false);
+      }
     }
-}
 
-generateBtn.addEventListener("click", generateVoice);
+    generateButton.addEventListener("click", generateVoice);
 
-updateCounter();
-</script>
+    /* Optional soft click sound */
 
+    function playClickSound() {
+      if (!soundEnabled) return;
+
+      try {
+        const AudioContextClass =
+          window.AudioContext || window.webkitAudioContext;
+
+        if (!AudioContextClass) return;
+
+        if (!audioContext) {
+          audioContext = new AudioContextClass();
+        }
+
+        if (audioContext.state === "suspended") {
+          audioContext.resume();
+        }
+
+        const oscillator = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+
+        oscillator.type = "sine";
+        oscillator.frequency.setValueAtTime(
+          620,
+          audioContext.currentTime
+        );
+        oscillator.frequency.exponentialRampToValueAtTime(
+          390,
+          audioContext.currentTime + 0.07
+        );
+
+        gain.gain.setValueAtTime(0.0001, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(
+          0.035,
+          audioContext.currentTime + 0.012
+        );
+        gain.gain.exponentialRampToValueAtTime(
+          0.0001,
+          audioContext.currentTime + 0.11
+        );
+
+        oscillator.connect(gain);
+        gain.connect(audioContext.destination);
+
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.12);
+
+      } catch (error) {
+        console.warn("Click sound unavailable:", error);
+      }
+    }
+
+    const soundToggle = document.getElementById("soundToggle");
+    const soundIcon = document.getElementById("soundIcon");
+    const soundLabel = document.getElementById("soundLabel");
+
+    soundToggle.addEventListener("click", () => {
+      soundEnabled = !soundEnabled;
+
+      soundToggle.setAttribute("aria-pressed", String(soundEnabled));
+      soundIcon.textContent = soundEnabled ? "♫" : "♪";
+      soundLabel.textContent = soundEnabled ? "Sound On" : "Sound Off";
+
+      if (soundEnabled) {
+        playClickSound();
+      }
+    });
+
+    /* Small water-like ripple on buttons */
+
+    document.querySelectorAll("button").forEach((button) => {
+      button.addEventListener("click", (event) => {
+        if (button.disabled) return;
+
+        const rect = button.getBoundingClientRect();
+        const ripple = document.createElement("span");
+
+        ripple.className = "ripple";
+        ripple.style.left = `${event.clientX - rect.left}px`;
+        ripple.style.top = `${event.clientY - rect.top}px`;
+
+        button.appendChild(ripple);
+
+        ripple.addEventListener("animationend", () => {
+          ripple.remove();
+        }, { once: true });
+      });
+    });
+
+    updateCounter();
+
+    window.addEventListener("beforeunload", () => {
+      if (currentAudioUrl) {
+        URL.revokeObjectURL(currentAudioUrl);
+      }
+    });
+  </script>
 </body>
 </html>
