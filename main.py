@@ -10,7 +10,7 @@ import edge_tts
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.background import BackgroundTask
+from starlette.background import BackgroundTask
 from pydantic import BaseModel, Field
 
 
