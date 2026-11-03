@@ -1,483 +1,485 @@
+
 <!DOCTYPE html>
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My AI Video Studio</title>
+<meta name="theme-color" content="#f5f5f7">
+<title>My AI Voice Studio</title>
 
 <style>
-*{box-sizing:border-box}
+:root {
+    --ink: #20212a;
+    --muted: #777b89;
+    --blue: #3978f6;
+    --glass: rgba(255,255,255,.68);
+}
+* { box-sizing: border-box; }
 
-body{
-margin:0;
-padding:20px;
-background:#101827;
-color:white;
-font-family:Arial,sans-serif
+body {
+    margin: 0;
+    min-height: 100vh;
+    padding: 35px 16px;
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background:
+      radial-gradient(ellipse at 12% 12%, rgba(179,211,255,.8), transparent 34%),
+      radial-gradient(ellipse at 88% 18%, rgba(225,204,255,.75), transparent 32%),
+      radial-gradient(ellipse at 50% 100%, rgba(191,232,255,.8), transparent 42%),
+      linear-gradient(135deg,#f6f8ff,#eef2fb 48%,#f8f5ff);
+    background-attachment: fixed;
 }
 
-.container{
-max-width:750px;
-margin:20px auto;
-padding:24px;
-background:#1d293b;
-border-radius:16px
+.page { width:100%; max-width:760px; margin:auto; }
+
+.header {
+    text-align:center;
+    padding:22px 10px 28px;
+    animation: rise .7s ease both;
 }
 
-h1{text-align:center;color:#62d6ff}
-h2{color:#62d6ff;margin-top:10px}
-
-label{
-display:block;
-margin-top:18px;
-margin-bottom:8px;
-font-weight:bold
+.brand-icon {
+    width:66px;
+    height:66px;
+    margin:0 auto 17px;
+    display:grid;
+    place-items:center;
+    border:1px solid white;
+    border-radius:23px;
+    background:linear-gradient(145deg,#fff,#dceaff);
+    color:#3978f6;
+    font-size:32px;
+    box-shadow:0 16px 38px rgba(93,119,177,.16);
 }
 
-select,textarea,button{
-width:100%;
-padding:13px;
-border-radius:9px;
-border:none;
-font-size:16px
+h1 {
+    margin:0;
+    font-size:clamp(30px,5vw,43px);
+    letter-spacing:-1.5px;
+    font-weight:750;
 }
 
-select,textarea{background:#f3f5f8;color:#111}
-
-textarea{
-min-height:260px;
-resize:vertical;
-line-height:1.6
+.subtitle {
+    margin:11px 0 0;
+    color:var(--muted);
+    font-size:15px;
+    line-height:1.6;
 }
 
-button{
-margin-top:20px;
-background:#08a6dc;
-color:white;
-font-weight:bold;
-cursor:pointer
+.panel {
+    padding:30px;
+    border:1px solid rgba(255,255,255,.9);
+    border-radius:30px;
+    background:var(--glass);
+    backdrop-filter:blur(26px) saturate(160%);
+    -webkit-backdrop-filter:blur(26px) saturate(160%);
+    box-shadow:0 24px 70px rgba(77,94,139,.13),
+               inset 1px 1px 0 rgba(255,255,255,.95);
+    animation:rise .8s .08s ease both;
 }
 
-button:disabled{opacity:.6}
+.field { margin-bottom:22px; }
 
-#status,#plannerStatus{
-margin-top:16px;
-text-align:center;
-line-height:1.5
+label {
+    display:block;
+    margin-bottom:10px;
+    font-size:14px;
+    font-weight:680;
 }
 
-audio{width:100%;margin-top:20px}
-
-.download{
-display:block;
-text-align:center;
-margin-top:15px;
-padding:13px;
-background:#16834a;
-color:white;
-text-decoration:none;
-border-radius:9px;
-font-weight:bold
+select, textarea {
+    display:block;
+    width:100%;
+    border:1px solid rgba(210,218,235,.9);
+    border-radius:17px;
+    background:rgba(255,255,255,.78);
+    color:var(--ink);
+    padding:15px 16px;
+    font:inherit;
+    font-size:15px;
+    outline:none;
+    transition:.2s ease;
 }
 
-.small{
-color:#c5d0df;
-font-size:13px;
-line-height:1.5
+select:focus, textarea:focus {
+    border-color:rgba(57,120,246,.65);
+    box-shadow:0 0 0 4px rgba(57,120,246,.12);
 }
 
-.section-divider{
-border:0;
-border-top:1px solid #42516a;
-margin:35px 0
+.gender-switch {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    padding:6px;
+    border:1px solid rgba(210,218,235,.72);
+    border-radius:19px;
+    background:rgba(225,232,246,.55);
 }
 
-.scene-card{
-background:#26364c;
-padding:16px;
-margin-top:16px;
-border-radius:12px;
-border:1px solid #42516a;
-overflow-wrap:anywhere
+.gender-option {
+    min-height:58px;
+    padding:11px;
+    border:1px solid transparent;
+    border-radius:14px;
+    color:#626a7a;
+    background:transparent;
+    font:inherit;
+    font-size:15px;
+    font-weight:650;
+    cursor:pointer;
+    transition:.22s ease;
 }
 
-.scene-card h3{color:#62d6ff;margin-top:0}
-.scene-card p{line-height:1.6}
-.scene-card strong{color:#b9eaff}
-
-.character-card{
-background:#202f43;
-padding:14px;
-margin-top:12px;
-border-radius:10px;
-overflow-wrap:anywhere
+.gender-option:hover {
+    transform:translateY(-1px);
 }
 
-.copy-button{
-background:#16834a;
-margin-top:10px;
-padding:10px
+.gender-option[aria-pressed="true"] {
+    color:#245fe0;
+    border-color:white;
+    background:linear-gradient(145deg,#fff,#eff5ff);
+    box-shadow:0 5px 14px rgba(75,99,150,.12);
 }
 
-.format-option{
-display:flex;
-align-items:center;
-gap:12px;
-padding:16px;
-margin-top:12px;
-background:#26364c;
-border:2px solid #42516a;
-border-radius:12px;
-cursor:pointer
+textarea {
+    min-height:300px;
+    resize:vertical;
+    line-height:1.75;
 }
 
-.format-option:has(input:checked){
-border-color:#08a6dc;
-background:#183d54
+textarea::placeholder { color:#a1a6b3; }
+
+.counter-row {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    margin-top:10px;
+    font-size:12px;
+    color:var(--muted);
 }
 
-.format-option input{
-width:20px;
-height:20px;
-accent-color:#08a6dc
+#wordCount { font-weight:700; color:#3978f6; }
+#wordCount.over { color:#dc3545; }
+
+.hint {
+    margin:9px 2px 0;
+    color:var(--muted);
+    font-size:12px;
+    line-height:1.6;
 }
 
-.format-option span{line-height:1.5}
+#generateBtn {
+    width:100%;
+    border:1px solid rgba(255,255,255,.5);
+    border-radius:17px;
+    padding:16px 20px;
+    color:white;
+    background:linear-gradient(135deg,#5b91ff,#3978f6 48%,#2863e7);
+    box-shadow:0 10px 24px rgba(48,105,226,.25);
+    font:inherit;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+    transition:.2s ease;
+}
 
-@media(max-width:500px){
-body{padding:10px}
-.container{padding:17px}
+#generateBtn:hover {
+    transform:translateY(-2px);
+    box-shadow:0 14px 30px rgba(48,105,226,.3);
+}
+
+#generateBtn:active { transform:scale(.985); }
+
+#generateBtn:disabled {
+    opacity:.7;
+    cursor:wait;
+    transform:none;
+}
+
+#status {
+    min-height:25px;
+    margin-top:16px;
+    color:var(--muted);
+    text-align:center;
+    line-height:1.6;
+    overflow-wrap:anywhere;
+    font-size:14px;
+}
+
+audio {
+    display:none;
+    width:100%;
+    margin-top:20px;
+}
+
+.download {
+    display:none;
+    margin-top:14px;
+    padding:15px;
+    border:1px solid rgba(57,120,246,.18);
+    border-radius:16px;
+    background:rgba(231,240,255,.85);
+    color:#2863d9;
+    text-align:center;
+    text-decoration:none;
+    font-weight:700;
+}
+
+.download:hover { background:#e0ecff; }
+
+.footer {
+    padding:22px 8px 4px;
+    color:var(--muted);
+    text-align:center;
+    font-size:12px;
+}
+
+@keyframes rise {
+    from { opacity:0; transform:translateY(14px); }
+    to { opacity:1; transform:translateY(0); }
+}
+
+@media(max-width:520px) {
+    body { padding:16px 11px; }
+    .panel { padding:22px 17px; border-radius:25px; }
+    textarea { min-height:240px; }
 }
 </style>
 </head>
 
 <body>
-<div class="container">
+<main class="page">
 
-<!-- VIDEO FORMAT SELECTION -->
+<header class="header">
+    <div class="brand-icon">♫</div>
+    <h1>My AI Voice Studio</h1>
+    <p class="subtitle">
+        अपनी स्क्रिप्ट को प्राकृतिक AI आवाज़ में बदलें।
+    </p>
+</header>
 
-<h1>🎬 My AI Video Studio</h1>
-<p style="text-align:center">
-सबसे पहले अपना Video Format चुनें
-</p>
+<section class="panel">
 
-<label>आप किस तरह का वीडियो बनाना चाहते हैं?</label>
+    <div class="field">
+        <label>आवाज़ चुनें</label>
 
-<label class="format-option">
-<input type="radio" name="videoFormat" value="landscape">
-<span>
-<strong>📺 Full YouTube Video</strong><br>
-16:9 — Landscape Format
-</span>
-</label>
+        <div class="gender-switch" role="group" aria-label="आवाज़ चुनें">
+            <button class="gender-option"
+                    type="button"
+                    data-gender="female"
+                    aria-pressed="true">
+                ♀ Female
+            </button>
 
-<label class="format-option">
-<input type="radio" name="videoFormat" value="portrait">
-<span>
-<strong>📱 YouTube Shorts / Reels</strong><br>
-9:16 — Vertical Format
-</span>
-</label>
+            <button class="gender-option"
+                    type="button"
+                    data-gender="male"
+                    aria-pressed="false">
+                ♂ Male
+            </button>
+        </div>
+    </div>
 
-<p class="small">
-Format चुनने के बाद नीचे अपनी स्क्रिप्ट और कहानी इस्तेमाल करें।
-</p>
+    <div class="field">
+        <label for="language">भाषा चुनें</label>
+        <select id="language">
+            <option value="hi" selected>हिंदी</option>
+            <option value="en">English (India)</option>
+        </select>
+    </div>
 
-<hr class="section-divider">
+    <div class="field">
+        <label for="style">बोलने का अंदाज़ चुनें</label>
+        <select id="style">
+            <option value="story">Storytelling — कहानी सुनाने का अंदाज़</option>
+            <option value="documentary">Documentary — गंभीर और जानकारीपूर्ण</option>
+            <option value="explainer">Explainer — सरल और दोस्ताना</option>
+        </select>
+    </div>
 
-<!-- EXISTING VOICEOVER STUDIO -->
+    <div class="field">
+        <label for="script">अपनी स्क्रिप्ट यहाँ पेस्ट करें</label>
 
-<h1>🎙️ My AI Voiceover Studio</h1>
-<p style="text-align:center">अपनी स्क्रिप्ट को MP3 आवाज़ में बदलें</p>
+        <textarea
+            id="script"
+            maxlength="200000"
+            placeholder="अपनी पूरी स्क्रिप्ट यहाँ पेस्ट करें..."
+        ></textarea>
 
-<label>भाषा चुनें</label>
-<select id="language">
-<option value="hi">हिंदी</option>
-<option value="en">English</option>
-</select>
+        <div class="counter-row">
+            <span id="wordCount">0 / 10,000 शब्द</span>
+            <span id="charCount">0 characters</span>
+        </div>
 
-<label>Voice Style चुनें</label>
-<select id="style">
-<option value="story">Storytelling – कहानी सुनाने का अंदाज़</option>
-<option value="documentary">Documentary – गंभीर और जानकारीपूर्ण</option>
-<option value="explainer">Explainer – सरल और दोस्ताना</option>
-</select>
+        <p class="hint">
+            अधिकतम 10,000 शब्द। लंबी स्क्रिप्ट का Voiceover बनने में काफी समय लग सकता है।
+            प्रक्रिया पूरी होने तक पेज खुला रखें।
+        </p>
+    </div>
 
-<label>अपनी स्क्रिप्ट यहाँ पेस्ट करें</label>
-<textarea id="script" placeholder="अपनी स्क्रिप्ट यहाँ लिखें या पेस्ट करें..."></textarea>
+    <button id="generateBtn" type="button">
+        Generate Voice
+    </button>
 
-<p class="small">लंबी स्क्रिप्ट बनाने में अधिक समय लग सकता है। इंटरनेट चालू रखें।</p>
+    <div id="status" role="status" aria-live="polite"></div>
 
-<button id="generateBtn" onclick="generateVoice()">Generate Voiceover</button>
-<div id="status"></div>
+    <audio id="audioPlayer" controls preload="none"></audio>
 
-<audio id="audioPlayer" controls style="display:none"></audio>
-<a id="downloadLink" class="download" style="display:none" download="voiceover.mp3">⬇️ Download MP3</a>
+    <a id="downloadLink"
+       class="download"
+       download="voiceover.mp3">
+       ↓ Download MP3
+    </a>
 
-<hr class="section-divider">
+</section>
 
-<!-- AI SCENE PLANNER -->
+<footer class="footer">
+    My AI Voice Studio
+</footer>
 
-<h1>🎬 AI Scene Planner</h1>
-
-<p style="text-align:center">
-अपनी कहानी को AI की मदद से अलग-अलग Video Scenes में बदलें
-</p>
-
-<label>अपनी कहानी या स्क्रिप्ट यहाँ पेस्ट करें</label>
-
-<textarea id="plannerScript" placeholder="यहाँ अपनी पूरी कहानी या स्क्रिप्ट पेस्ट करें..."></textarea>
-
-<p class="small">
-AI आपकी कहानी के Scenes, Characters, Image Prompts,
-Camera Details और Sound Effects तैयार करेगा।
-</p>
-
-<button id="plannerBtn" onclick="generateScenes()">
-✨ Generate AI Scenes
-</button>
-
-<div id="plannerStatus"></div>
-<div id="plannerResults"></div>
-
-</div>
+</main>
 
 <script>
+const MAX_WORDS = 10000;
 
-// EXISTING VOICEOVER JAVASCRIPT
+let selectedGender = "female";
+let currentAudioUrl = null;
 
-let currentAudioUrl=null;
+const scriptInput = document.getElementById("script");
+const wordCount = document.getElementById("wordCount");
+const charCount = document.getElementById("charCount");
+const generateBtn = document.getElementById("generateBtn");
+const statusBox = document.getElementById("status");
+const audioPlayer = document.getElementById("audioPlayer");
+const downloadLink = document.getElementById("downloadLink");
 
-async function generateVoice(){
-const script=document.getElementById("script").value.trim();
-const language=document.getElementById("language").value;
-const style=document.getElementById("style").value;
-const button=document.getElementById("generateBtn");
-const status=document.getElementById("status");
-const player=document.getElementById("audioPlayer");
-const download=document.getElementById("downloadLink");
+function countWords(text) {
+    const cleaned = text.trim();
+    return cleaned ? cleaned.split(/\s+/u).length : 0;
+}
 
-if(!script){status.textContent="पहले अपनी स्क्रिप्ट पेस्ट करें।";return;}
+function updateCounter() {
+    const words = countWords(scriptInput.value);
+    const characters = scriptInput.value.length;
 
-button.disabled=true;
-button.textContent="आवाज़ तैयार हो रही है...";
-status.textContent="कृपया प्रतीक्षा करें...";
-player.style.display="none";
-download.style.display="none";
+    wordCount.textContent =
+        words.toLocaleString("en-IN") +
+        " / 10,000 शब्द";
 
-try{
-const response=await fetch("/api/voiceover",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({script:script,language:language,style:style})
+    charCount.textContent =
+        characters.toLocaleString("en-IN") +
+        " characters";
+
+    wordCount.classList.toggle("over", words > MAX_WORDS);
+    generateBtn.disabled = words > MAX_WORDS;
+}
+
+scriptInput.addEventListener("input", updateCounter);
+
+document.querySelectorAll(".gender-option").forEach((option) => {
+    option.addEventListener("click", () => {
+        selectedGender = option.dataset.gender;
+
+        document.querySelectorAll(".gender-option").forEach((button) => {
+            button.setAttribute(
+                "aria-pressed",
+                String(button.dataset.gender === selectedGender)
+            );
+        });
+    });
 });
 
-if(!response.ok){
-let message="ऑडियो नहीं बन पाया।";
-try{const errorData=await response.json();message=errorData.detail||message;}catch(e){}
-throw new Error(message);
+async function generateVoice() {
+    const script = scriptInput.value.trim();
+    const words = countWords(script);
+
+    if (!script) {
+        statusBox.textContent = "पहले अपनी स्क्रिप्ट पेस्ट करें।";
+        return;
+    }
+
+    if (words > MAX_WORDS) {
+        statusBox.textContent =
+            "आपकी स्क्रिप्ट 10,000 शब्दों से ज्यादा है।";
+        return;
+    }
+
+    const language = document.getElementById("language").value;
+    const style = document.getElementById("style").value;
+
+    generateBtn.disabled = true;
+    generateBtn.textContent = "आवाज़ तैयार हो रही है...";
+
+    statusBox.textContent =
+        "आपकी स्क्रिप्ट प्रोसेस हो रही है। कृपया प्रतीक्षा करें।";
+
+    audioPlayer.pause();
+    audioPlayer.removeAttribute("src");
+    audioPlayer.style.display = "none";
+    downloadLink.style.display = "none";
+
+    try {
+        const response = await fetch("/api/voiceover", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                script: script,
+                gender: selectedGender,
+                language: language,
+                style: style
+            })
+        });
+
+        if (!response.ok) {
+            let message = "ऑडियो नहीं बन पाया।";
+
+            try {
+                const errorData = await response.json();
+                message = errorData.detail || message;
+            } catch (error) {}
+
+            throw new Error(message);
+        }
+
+        const audioBlob = await response.blob();
+
+        if (!audioBlob.size) {
+            throw new Error("खाली ऑडियो मिला। दोबारा कोशिश करें।");
+        }
+
+        if (currentAudioUrl) {
+            URL.revokeObjectURL(currentAudioUrl);
+        }
+
+        currentAudioUrl = URL.createObjectURL(audioBlob);
+
+        audioPlayer.src = currentAudioUrl;
+        audioPlayer.style.display = "block";
+
+        downloadLink.href = currentAudioUrl;
+        downloadLink.style.display = "block";
+
+        statusBox.textContent =
+            "आपका पूरा Voiceover तैयार है! अब सुनें या MP3 डाउनलोड करें।";
+
+    } catch (error) {
+        statusBox.textContent =
+            "समस्या: " + error.message +
+            " अगर स्क्रिप्ट बहुत लंबी है, तो सर्वर की समय सीमा भी कारण हो सकती है।";
+
+    } finally {
+        generateBtn.disabled = countWords(scriptInput.value) > MAX_WORDS;
+        generateBtn.textContent = "Generate Voice";
+    }
 }
 
-const audioBlob=await response.blob();
-if(currentAudioUrl){URL.revokeObjectURL(currentAudioUrl);}
-currentAudioUrl=URL.createObjectURL(audioBlob);
+generateBtn.addEventListener("click", generateVoice);
 
-player.src=currentAudioUrl;
-player.style.display="block";
-download.href=currentAudioUrl;
-download.style.display="block";
-status.textContent="✅ आपका Voiceover तैयार है!";
-
-}catch(error){
-status.textContent="❌ "+error.message;
-}finally{
-button.disabled=false;
-button.textContent="Generate Voiceover";
-}
-}
-
-
-// AI SCENE PLANNER JAVASCRIPT
-
-async function generateScenes(){
-
-const script=document.getElementById("plannerScript").value.trim();
-const button=document.getElementById("plannerBtn");
-const status=document.getElementById("plannerStatus");
-const results=document.getElementById("plannerResults");
-
-const selectedFormat=document.querySelector('input[name="videoFormat"]:checked');
-
-if(!selectedFormat){
-status.textContent="पहले Full Video या Shorts Format चुनें।";
-return;
-}
-
-if(!script){
-status.textContent="पहले अपनी कहानी या स्क्रिप्ट पेस्ट करें।";
-return;
-}
-
-button.disabled=true;
-button.textContent="AI Scenes तैयार कर रहा है...";
-status.textContent="कृपया प्रतीक्षा करें। आपकी कहानी का विश्लेषण हो रहा है...";
-results.innerHTML="";
-
-try{
-
-const response=await fetch("/api/plan-scenes",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-script:script,
-video_format:selectedFormat.value
-})
-});
-
-if(!response.ok){
-let message="Scenes तैयार नहीं हो पाए।";
-try{
-const errorData=await response.json();
-message=errorData.detail||message;
-}catch(e){}
-throw new Error(message);
-}
-
-const data=await response.json();
-
-displaySceneResults(data);
-
-status.textContent="✅ आपके AI Scenes सफलतापूर्वक तैयार हो गए!";
-
-}catch(error){
-status.textContent="❌ "+error.message;
-}finally{
-button.disabled=false;
-button.textContent="✨ Generate AI Scenes";
-}
-}
-
-
-// DISPLAY SCENE RESULTS
-
-function displaySceneResults(data){
-
-const results=document.getElementById("plannerResults");
-results.innerHTML="";
-
-const summary=document.createElement("div");
-summary.className="scene-card";
-
-const summaryTitle=document.createElement("h3");
-summaryTitle.textContent="📖 Story Summary";
-
-const formatText=document.createElement("p");
-formatText.textContent="🎞️ Video Format: "+(data.video_format||"");
-
-const ratioText=document.createElement("p");
-ratioText.textContent="📐 Aspect Ratio: "+(data.aspect_ratio||"");
-
-const summaryText=document.createElement("p");
-summaryText.textContent=data.story_summary||"";
-
-const styleText=document.createElement("p");
-styleText.textContent="🎨 Visual Style: "+(data.visual_style||"");
-
-summary.append(summaryTitle,formatText,ratioText,summaryText,styleText);
-results.appendChild(summary);
-
-
-// CHARACTERS
-
-const characterHeading=document.createElement("h2");
-characterHeading.textContent="👥 Characters";
-results.appendChild(characterHeading);
-
-(data.characters||[]).forEach(character=>{
-
-const card=document.createElement("div");
-card.className="character-card";
-
-const heading=document.createElement("h3");
-heading.textContent=character.character_id||"Character";
-
-const description=document.createElement("p");
-description.textContent=character.description||"";
-
-card.append(heading,description);
-results.appendChild(card);
-
-});
-
-
-// SCENES
-
-const sceneHeading=document.createElement("h2");
-sceneHeading.textContent="🎬 Scene Breakdown";
-results.appendChild(sceneHeading);
-
-(data.scenes||[]).forEach(scene=>{
-
-const card=document.createElement("div");
-card.className="scene-card";
-
-const heading=document.createElement("h3");
-heading.textContent="Scene "+scene.scene_number;
-
-const narration=document.createElement("p");
-narration.textContent="🗣️ Narration: "+(scene.narration||"");
-
-const prompt=document.createElement("p");
-prompt.textContent="🖼️ Image Prompt: "+(scene.image_prompt||"");
-
-const characters=document.createElement("p");
-characters.textContent="👤 Characters: "+((scene.character_ids||[]).join(", ")||"None");
-
-const setting=document.createElement("p");
-setting.textContent="🌄 Setting: "+(scene.setting||"");
-
-const camera=document.createElement("p");
-camera.textContent="📷 Camera: "+(scene.camera||"");
-
-const mood=document.createElement("p");
-mood.textContent="🎭 Mood: "+(scene.mood||"");
-
-const sounds=document.createElement("p");
-sounds.textContent="🔊 Sound Effects: "+((scene.sound_effects||[]).join(", ")||"None");
-
-const music=document.createElement("p");
-music.textContent="🎵 Music: "+(scene.music_cue||"");
-
-const copyButton=document.createElement("button");
-copyButton.className="copy-button";
-copyButton.textContent="📋 Copy Image Prompt";
-
-copyButton.onclick=async function(){
-try{
-await navigator.clipboard.writeText(scene.image_prompt||"");
-copyButton.textContent="✅ Copied!";
-}catch(error){
-copyButton.textContent="Copy नहीं हुआ";
-}
-};
-
-card.append(
-heading,narration,prompt,characters,setting,
-camera,mood,sounds,music,copyButton
-);
-
-results.appendChild(card);
-
-});
-
-if(!data.scenes||data.scenes.length===0){
-const empty=document.createElement("p");
-empty.textContent="AI ने कोई Scene नहीं लौटाया। दोबारा कोशिश करें।";
-results.appendChild(empty);
-}
-
-}
-
+updateCounter();
 </script>
+
 </body>
 </html>
