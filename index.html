@@ -1074,6 +1074,7 @@
             <select id="language">
               <option value="hi" selected>Hindi (India)</option>
               <option value="en">English (India)</option>
+              <option value="or">Odia (Odisha)</option>
             </select>
           </div>
         </div>
@@ -1107,7 +1108,7 @@
           maxlength="200000"
           placeholder="यहाँ अपनी पूरी स्क्रिप्ट लिखें या paste करें...
 
-आप Hindi या English में अपनी स्क्रिप्ट लिख सकते हैं। बेहतर natural voice के लिए punctuation और full stops का सही इस्तेमाल करें।"
+आप Hindi, English या Odia (ଓଡ଼ିଆ) में अपनी स्क्रिप्ट paste कर सकते हैं। Odia के लिए Odia लिपि का उपयोग करें। बेहतर natural voice के लिए punctuation का सही इस्तेमाल करें।"
           aria-label="Enter your script"
         ></textarea>
       </div>
@@ -1230,6 +1231,16 @@
     }
 
     scriptInput.addEventListener("input", updateCounter);
+
+    languageSelect.addEventListener("change", () => {
+      if (languageSelect.value === "or") {
+        scriptInput.placeholder =
+          "ଏଠାରେ ଆପଣଙ୍କର ଓଡ଼ିଆ ସ୍କ୍ରିପ୍ଟ ଲେଖନ୍ତୁ କିମ୍ବା paste କରନ୍ତୁ...\\n\\nପୁରୀ ଓଡ଼ିଶାର ଜଗନ୍ନାଥ ସଂସ୍କୃତି ସମ୍ବନ୍ଧୀୟ ଓଡ଼ିଆ ଲେଖା ମଧ୍ୟ paste କରିପାରିବେ।";
+      } else {
+        scriptInput.placeholder =
+          "यहाँ अपनी पूरी स्क्रिप्ट लिखें या paste करें...\\n\\nआप Hindi या English में अपनी स्क्रिप्ट लिख सकते हैं। बेहतर natural voice के लिए punctuation और full stops का सही इस्तेमाल करें।";
+      }
+    });
 
     voiceCards.forEach((card) => {
       card.addEventListener("click", () => {
