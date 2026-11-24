@@ -5,8 +5,13 @@ import shutil
 import tempfile
 import subprocess
 import logging
+import sys
+import wave
+import threading
 
 import edge_tts
+import numpy as np
+from huggingface_hub import snapshot_download
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
@@ -23,6 +28,56 @@ app = FastAPI(title="My AI Voice Studio")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("voice_studio")
+
+# Lightweight, CPU-friendly Odia model. It is downloaded from Hugging Face
+# on first Odia request and cached by huggingface_hub on the server.
+ODIA_MODEL_ID = "sulabhkatiyar/indic-tiny-tts-odia"
+_odia_tts = None
+_odia_tts_lock = threading.Lock()
+
+
+def get_odia_tts():
+    global _odia_tts
+
+    if _odia_tts is not None:
+        return _odia_tts
+
+    with _odia_tts_lock:
+        if _odia_tts is not None:
+            return _odia_tts
+
+        model_dir = snapshot_download(
+            repo_id=ODIA_MODEL_ID,
+            allow_patterns=[
+                "config.json",
+                "indic_tiny_tts/**",
+                "onnx/**",
+            ],
+            ignore_patterns=["*.safetensors", "samples/**"],
+        )
+
+        if model_dir not in sys.path:
+            sys.path.insert(0, model_dir)
+
+        from indic_tiny_tts import TinyTTSOnnx
+
+        _odia_tts = TinyTTSOnnx.from_pretrained(
+            model_dir,
+            threads=2,
+        )
+        logger.info("Odia ONNX voice model loaded from %s", ODIA_MODEL_ID)
+
+    return _odia_tts
+
+
+def save_odia_wav(audio, path, sample_rate):
+    """Write a mono float waveform as a standard 16-bit PCM WAV file."""
+    pcm = (np.clip(audio, -1.0, 1.0) * 32767.0).astype("<i2")
+    with wave.open(path, "wb") as wav_file:
+        wav_file.setnchannels(1)
+        wav_file.setsampwidth(2)
+        wav_file.setframerate(sample_rate)
+        wav_file.writeframes(pcm.tobytes())
 
 app.add_middleware(
     CORSMiddleware,
@@ -251,7 +306,7 @@ async def generate_voice(request: VoiceRequest):
             detail="गलत voice selection."
         )
 
-    if language not in ("hi", "en"):
+    if language not in ("hi", "en", "or"):
         raise HTTPException(
             status_code=400,
             detail="गलत language selection."
@@ -263,7 +318,7 @@ async def generate_voice(request: VoiceRequest):
             detail="गलत speaking style."
         )
 
-    voice = VOICES[gender][language]
+    voice = VOICES[gender].get(language) if language != "or" else gender
     rate = RATES[style]
 
     # Divide script into chunks
@@ -290,91 +345,124 @@ async def generate_voice(request: VoiceRequest):
 
     try:
 
-        audio_files = []
-
-        # Generate every audio chunk
-        for index, chunk in enumerate(chunks):
-
-            chunk_path = os.path.join(
-                temp_dir,
-                f"part_{index:05d}.mp3"
-            )
-
-            communicate = edge_tts.Communicate(
-                text=chunk,
-                voice=voice,
-                rate=rate
-            )
-
-            await communicate.save(chunk_path)
-
-            if (
-                not os.path.exists(chunk_path)
-                or os.path.getsize(chunk_path) == 0
-            ):
-                raise RuntimeError(
-                    f"Audio chunk {index + 1} was empty."
-                )
-
-            audio_files.append(chunk_path)
-
-            logger.info(
-                "Generated audio chunk %s/%s",
-                index + 1,
-                len(chunks)
-            )
-
-        # --------------------------------------------------
-        # CREATE FFMPEG CONCAT FILE
-        # --------------------------------------------------
-
-        concat_file = os.path.join(
-            temp_dir,
-            "audio_list.txt"
-        )
-
-        with open(
-            concat_file,
-            "w",
-            encoding="utf-8"
-        ) as file:
-
-            for audio_file in audio_files:
-
-                safe_path = audio_file.replace(
-                    "'",
-                    "'\\''"
-                )
-
-                file.write(
-                    f"file '{safe_path}'\n"
-                )
-
-        # --------------------------------------------------
-        # MERGE AUDIO CHUNKS
-        # --------------------------------------------------
-
         output_path = os.path.join(
             temp_dir,
             "voiceover.mp3"
         )
 
-        result = subprocess.run(
-            [
-                "ffmpeg",
-                "-y",
-                "-f", "concat",
-                "-safe", "0",
-                "-i", concat_file,
-                "-vn",
-                "-c:a", "libmp3lame",
-                "-b:a", "128k",
-                output_path
-            ],
-            capture_output=True,
-            text=True,
-            timeout=7200
-        )
+        if language == "or":
+            # The Odia model is a compact ONNX model that runs on CPU.
+            # It reads Odia-script text directly and provides female/male voices.
+            odia_tts = get_odia_tts()
+            style_speeds = {
+                "story": 0.92,
+                "documentary": 0.96,
+                "explainer": 1.04,
+            }
+            audio = odia_tts.synthesize(
+                script,
+                voice=gender,
+                speed=style_speeds[style],
+            )
+
+            if audio is None or len(audio) == 0:
+                raise RuntimeError("Odia model returned empty audio.")
+
+            wav_path = os.path.join(temp_dir, "odia_voiceover.wav")
+            save_odia_wav(audio, wav_path, odia_tts.sample_rate)
+
+            logger.info(
+                "Generated Odia audio | voice=%s | style=%s | samples=%s",
+                gender,
+                style,
+                len(audio),
+            )
+
+            result = subprocess.run(
+                [
+                    "ffmpeg", "-y",
+                    "-i", wav_path,
+                    "-vn",
+                    "-c:a", "libmp3lame",
+                    "-b:a", "128k",
+                    output_path,
+                ],
+                capture_output=True,
+                text=True,
+                timeout=7200,
+            )
+        else:
+            # Keep the existing Hindi and English Edge TTS path unchanged.
+            chunks = split_text(script)
+
+            if not chunks:
+                raise HTTPException(
+                    status_code=400,
+                    detail="स्क्रिप्ट खाली है।"
+                )
+
+            audio_files = []
+
+            for index, chunk in enumerate(chunks):
+                chunk_path = os.path.join(
+                    temp_dir,
+                    f"part_{index:05d}.mp3"
+                )
+
+                communicate = edge_tts.Communicate(
+                    text=chunk,
+                    voice=voice,
+                    rate=rate
+                )
+
+                await communicate.save(chunk_path)
+
+                if (
+                    not os.path.exists(chunk_path)
+                    or os.path.getsize(chunk_path) == 0
+                ):
+                    raise RuntimeError(
+                        f"Audio chunk {index + 1} was empty."
+                    )
+
+                audio_files.append(chunk_path)
+
+                logger.info(
+                    "Generated audio chunk %s/%s",
+                    index + 1,
+                    len(chunks)
+                )
+
+            concat_file = os.path.join(
+                temp_dir,
+                "audio_list.txt"
+            )
+
+            with open(
+                concat_file,
+                "w",
+                encoding="utf-8"
+            ) as file:
+                for audio_file in audio_files:
+                    safe_path = audio_file.replace("'", "'\\''")
+                    file.write(f"file '{safe_path}'\\n")
+
+            result = subprocess.run(
+                [
+                    "ffmpeg",
+                    "-y",
+                    "-f", "concat",
+                    "-safe", "0",
+                    "-i", concat_file,
+                    "-vn",
+                    "-c:a", "libmp3lame",
+                    "-b:a", "128k",
+                    output_path
+                ],
+                capture_output=True,
+                text=True,
+                timeout=7200
+            )
 
         if result.returncode != 0:
 
