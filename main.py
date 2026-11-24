@@ -445,7 +445,7 @@ async def generate_voice(request: VoiceRequest):
             ) as file:
                 for audio_file in audio_files:
                     safe_path = audio_file.replace("'", "'\\''")
-                    file.write(f"file '{safe_path}'\\n")
+                    file.write(f"file '{safe_path}'\n")
 
             result = subprocess.run(
                 [
