@@ -3,7 +3,7 @@
 
 **My AI Voice Studio** is a web-based AI voice generation application that converts written scripts into speech using Microsoft Edge TTS.
 
-Generate Hindi and Indian English voiceovers with Male and Female AI voices. Listen to your generated audio directly on the website and download it as an MP3 file.
+Generate Hindi, Indian English and Odia voiceovers with Male and Female AI voices. Listen to your generated audio directly on the website and download it as an MP3 file.
 
 🌐 **Live Website:** https://my-ai-video-studio.onrender.com
 
@@ -14,6 +14,7 @@ Generate Hindi and Indian English voiceovers with Male and Female AI voices. Lis
 - 🎤 Male and Female AI voice selection
 - 🇮🇳 Hindi voice generation
 - 🇮🇳 Indian English voice generation
+- 🪷 Odia (ଓଡ଼ିଆ) voice generation with CPU-friendly open-source ONNX TTS
 - 📝 Script support up to 10,000 words
 - 📊 Live word counter
 - 📖 Story, Documentary and Explainer voice styles
@@ -32,6 +33,7 @@ Generate Hindi and Indian English voiceovers with Male and Female AI voices. Lis
 |---|---|
 | Hindi | hi-IN-SwaraNeural |
 | English (India) | en-IN-NeerjaNeural |
+| Odia | Indic Tiny TTS (female) |
 
 ### Male Voices
 
@@ -39,6 +41,7 @@ Generate Hindi and Indian English voiceovers with Male and Female AI voices. Lis
 |---|---|
 | Hindi | hi-IN-MadhurNeural |
 | English (India) | en-IN-PrabhatNeural |
+| Odia | Indic Tiny TTS (male) |
 
 ---
 
@@ -72,10 +75,11 @@ Generate Hindi and Indian English voiceovers with Male and Female AI voices. Lis
 2. Enter or paste your script.
 3. Select Male or Female voice.
 4. Choose Hindi or English.
-5. Select a voice style.
-6. Click **Generate Voice**.
-7. Play the generated audio.
-8. Download your MP3 file.
+5. Select Hindi, English or Odia (ଓଡ଼ିଆ).
+6. Select a voice style.
+7. Click **Generate Voice**.
+8. Play the generated audio.
+9. Download your MP3 file.
 
 ---
 
@@ -150,3 +154,15 @@ https://my-ai-video-studio.onrender.com
 
 ⭐ If you find this project useful, consider giving the repository a star!
 
+
+
+## 🪷 Odia TTS Model & Attribution
+
+Odia voice generation uses the CPU-friendly ONNX release of
+[sulabhkatiyar/indic-tiny-tts-odia](https://huggingface.co/sulabhkatiyar/indic-tiny-tts-odia).
+The model provides female and male Odia voices and is downloaded automatically
+on the first Odia generation request. No paid API key is used.
+
+Model weights are licensed CC-BY-4.0 and are attributed to Sulabh Katiyar
+and the AI4Bharat Rasa dataset. The model is designed for calm reading;
+speaking styles adjust pace, but do not provide guaranteed emotion-controlled acting.
